@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de" data-root="./">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060b1a">
+<title>WebNoah-Games · Browser-Spiele für die Pause</title>
+<meta name="description" content="Kostenlose Browser-Spiele ohne Konto und ohne Werbung: Schlange, Fächer-Memory, Vier in einer Reihe, Minenfeld, Ziegelbrecher, Reaktionstest und mehr.">
+<meta property="og:title" content="WebNoah-Games">
+<meta property="og:description" content="Browser-Spiele für die Pause. Ohne Konto, ohne Werbung.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_AT">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body class="hub">
+<div id="site-header"></div>
+
+<main>
+  <section class="gutter intro">
+    <div class="intro-top">
+      <div>
+        <p class="eyebrow" id="count-line">Spiele</p>
+        <h1 class="display">Spiele</h1>
+      </div>
+      <div class="seg" id="tabs" role="group" aria-label="Ansicht">
+        <button type="button" data-tab="all" aria-pressed="true">Alle Spiele</button>
+        <button type="button" data-tab="fav" aria-pressed="false">★ Favoriten <span class="badge" id="fav-count">0</span></button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <label class="search" for="q">
+        <span class="sr">Spiele durchsuchen</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="Spiele durchsuchen …" autocomplete="off">
+        <kbd>/</kbd>
+      </label>
+      <button class="btn" id="random" type="button" title="Zufälliges Spiel starten">Zufallsspiel</button>
+    </div>
+    <div class="cats" id="cats" role="group" aria-label="Kategorien"></div>
+  </section>
+
+  <section class="gutter" id="spot" aria-label="Im Rampenlicht">
+    <div class="spot">
+      <div class="spot-text">
+        <p class="eyebrow"><span class="dot"></span>Im Rampenlicht · <span id="spot-count">01 / 03</span></p>
+        <h2 class="display" id="spot-name"></h2>
+        <p id="spot-text"></p>
+        <div class="tags big" id="spot-tags"></div>
+        <div class="spot-actions">
+          <a class="btn primary" id="spot-play" href="#">Jetzt spielen</a>
+          <button class="btn icon" id="spot-prev" type="button" aria-label="Vorheriges Spiel">←</button>
+          <button class="btn icon" id="spot-next" type="button" aria-label="Nächstes Spiel">→</button>
+        </div>
+      </div>
+      <div class="spot-art" id="spot-art"></div>
+    </div>
+    <div class="spot-nav" id="spot-nav"></div>
+  </section>
+
+  <section class="gutter" id="pause">
+    <div class="day">
+      <div class="day-head">
+        <h2 class="display">Pausenplan</h2>
+        <span class="eyebrow">heute · 6 Stunden · 07:50 bis 14:10</span>
+      </div>
+      <div class="track" id="track" aria-hidden="true"></div>
+      <div class="next-break" id="next-break"></div>
+    </div>
+  </section>
+
+  <section class="gutter" id="spiele">
+    <div class="list-head">
+      <h2 class="display">Bibliothek</h2>
+      <p class="eyebrow" id="hits"></p>
+    </div>
+    <div class="cards" id="cards"></div>
+    <p class="empty" id="empty" hidden></p>
+  </section>
+
+  <section class="gutter" id="mitmachen">
+    <div class="join">
+      <div>
+        <p class="eyebrow">Mitmachen</p>
+        <h2 class="display">Idee für ein Spiel? Fehler gefunden?</h2>
+        <p>WebNoah-Games ist offen auf GitHub. Schreib dort ein Issue mit deinem Vorschlag oder Bug, oder bau gleich selbst ein Spiel dazu.</p>
+      </div>
+      <div class="join-actions">
+        <a class="btn primary" href="https://github.com/git-noah2026/webnoah-games/issues/new" target="_blank" rel="noopener">Vorschlag oder Bug melden</a>
+        <a class="btn" href="https://github.com/git-noah2026/webnoah-games" target="_blank" rel="noopener">Quellcode ansehen</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="assets/js/core.js"></script>
+<script src="assets/js/catalog.js"></script>
+<script src="assets/js/previews.js"></script>
+<script src="assets/js/cards.js"></script>
+<script src="assets/js/hub.js"></script>
+</body>
+</html>
