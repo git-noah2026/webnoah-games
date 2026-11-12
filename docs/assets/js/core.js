@@ -19,10 +19,16 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* Speicher nicht verfügbar */ } }
   };
   const bestKey = (id, v) => "wng:" + id + (v ? ":" + v : "");
+  const fmt = (g, v) => g.unit ? `${v} ${g.unit}` : `${v}`;
   const favs = {
     all: () => store.get("wng:favs") || [],
     has: id => favs.all().includes(id),
-    toggle(id) { const f = favs.all(), i = f.indexOf(id); if (i < 0) f.push(id); else f.splice(i, 1); store.set("wng:favs", f); return i < 0; }
+    toggle(id) {
+      const f = favs.all(), i = f.indexOf(id); if (i < 0) f.push(id); else f.splice(i, 1);
+      store.set("wng:favs", f);
+      if (W.cloud) W.cloud.favs();
+      return i < 0;
+    }
   };
 
   function pal() {
@@ -62,13 +68,14 @@
     wrap.append(cv, ov); stage.append(wrap);
     return {
       wrap, cv, ctx, ov,
-      show(title, text, label, fn, note) {
+      show(title, text, label, fn, note, alt) {
         ov.innerHTML = "";
         const card = h("div", "ov-card");
         if (note) card.append(h("span", "pen", note));
         card.append(h("strong", "", title));
         if (text) card.append(h("p", "", text));
         if (label) { const b = h("button", "btn primary", label); b.type = "button"; b.onclick = fn; card.append(b); setTimeout(() => b.focus({ preventScroll: true }), 0); }
+        if (alt) { const b = h("button", "btn", alt[0]); b.type = "button"; b.onclick = alt[1]; card.append(b); }
         ov.append(card); ov.hidden = false;
       },
       hide() { ov.hidden = true; },
@@ -108,10 +115,11 @@
     </a>
     <nav class="nav" aria-label="Hauptnavigation">
       <a href="${root}#spiele">Spiele</a>
+      <a href="${root}bestenliste/">Bestenliste</a>
       <a href="${root}#pause">Pausenplan</a>
-      <a href="${root}#mitmachen">Mitmachen</a>
     </nav>
     <div class="clock"><span id="clock-day"></span><b id="clock-time"></b></div>
+    <div id="account-slot"></div>
   </div>
 </header>`;
       const img = new Image();
@@ -144,6 +152,6 @@
     if (t) t.textContent = `${two(now.getHours())}:${two(now.getMinutes())}`;
   }
 
-  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
+  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, fmt, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", chrome); else chrome();
 })();

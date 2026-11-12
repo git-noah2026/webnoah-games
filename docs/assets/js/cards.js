@@ -1,11 +1,9 @@
 // WebNoah-Games: Spielkarten mit Live-Vorschau, Favoriten und Rekord.
 (() => {
   "use strict";
-  const { h, store, bestKey, favs, pal, reduced, root } = WNG;
+  const { h, store, bestKey, favs, pal, reduced, root, fmt } = WNG;
 
-  const fmt = (g, v) => g.unit ? `${v} ${g.unit}` : `${v}`;
   const href = g => g.ext || `${root}spiele/${g.id}/`;
-  WNG.fmt = fmt;
   WNG.href = href;
 
   /* ---------- Vorschau-Schleife: eine für alle sichtbaren Karten ---------- */

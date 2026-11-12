@@ -16,7 +16,18 @@ Ein Projekt der WebNoah Services GmbH, aus der WebNoah+ Familie.
 | Krieg der Adligen | extern auf games.webnoah.andrerer.org | Strategie |
 | Sudoku Solver | extern auf games.webnoah.andrerer.org | Logik |
 
-Rekorde und Favoriten speichert der Browser in `localStorage`. Es gibt keinen Server und kein Tracking.
+Ohne Konto speichert der Browser Rekorde und Favoriten in `localStorage`. Mit Konto landen sie zusätzlich in der Datenbank und sind auf jedem Gerät da.
+
+## Konten
+
+- Anmeldung mit Benutzername und Passwort, ohne E-Mail. Registrieren kann sich jeder.
+- Mit Konto: Rekorde und Favoriten auf allen Geräten, Spielstand (Ziegelbrecher merkt sich das Level), Bestenliste pro Spiel, Profilseite unter `/profil/?u=name`.
+- Passwörter werden mit PBKDF2-SHA256 (100 000 Runden, eigenes Salt) gespeichert. Die Sitzung liegt in einem HttpOnly-Cookie, in der Datenbank steht nur ein Hash davon.
+- Jedes Konto kann sich im Profil selbst löschen. Dabei werden alle Daten auf dem Server entfernt.
+- Passwort vergessen: Es gibt keinen automatischen Reset. Ein Admin kann das Konto in der D1-Konsole von Cloudflare löschen, dann kann sich die Person neu registrieren.
+- Die API läuft nur auf Cloudflare. Auf GitHub Pages fehlt sie, dort bleibt alles lokal und der Anmelde-Knopf ist ausgeblendet.
+
+Die Tabellen legt der Worker beim ersten Aufruf selbst an (`src/worker.js`, Konstante `SCHEMA`).
 
 ## Lokal starten
 
@@ -32,11 +43,13 @@ oder
 python -m http.server 8000 -d docs
 ```
 
-Dann `http://localhost:8000` öffnen. Die Fehlerseite `404.html` nutzt absolute Pfade und funktioniert deshalb nur, wenn die Seite im Root einer Domain liegt.
+Dann `http://localhost:8000` öffnen. Mit Konten, API und lokaler Datenbank: `npx wrangler dev`, danach `http://localhost:8787`. Die Fehlerseite `404.html` nutzt absolute Pfade und funktioniert deshalb nur, wenn die Seite im Root einer Domain liegt.
 
 ## Aufbau
 
 ```
+src/worker.js              API für Konten, Rekorde, Bestenliste (Cloudflare Worker + D1)
+wrangler.jsonc             Cloudflare-Konfiguration
 docs/index.html            Startseite: Rampenlicht, Pausenplan, Suche, Kategorien, Favoriten
 docs/404.html              Fehlerseite für GitHub Pages
 docs/assets/css/site.css   gemeinsames Design (Farben, Schriften, alle Bausteine)
@@ -45,7 +58,10 @@ docs/assets/js/catalog.js  Spielekatalog (Name, Kategorien, Dauer, Wertung)
 docs/assets/js/previews.js animierte Vorschauen für die Karten
 docs/assets/js/cards.js    Spielkarte mit Vorschau, Favorit und Rekord
 docs/assets/js/hub.js      Logik der Startseite
-docs/assets/js/shell.js    Rahmen jeder Spielseite (Punkte, Rekord, Tasten)
+docs/assets/js/auth.js     Anmelden, Registrieren, Abgleich mit dem Server
+docs/assets/js/shell.js    Rahmen jeder Spielseite (Punkte, Rekord, Tasten, Bestenliste)
+docs/profil/               Profilseite
+docs/bestenliste/          Bestenlisten aller Spiele
 docs/spiele/<id>/          eine Seite pro Spiel: index.html + game.js
 ```
 
@@ -58,7 +74,7 @@ docs/spiele/<id>/          eine Seite pro Spiel: index.html + game.js
    - `ui.onKey(fn)`, `ui.onKeyUp(fn)`, `ui.onRestart(fn)` für Tasten und den Neu-starten-Knopf
    - `ui.tools` als Platz für Umschalter über dem Spielfeld
    Die Funktion darf eine Aufräumfunktion zurückgeben.
-3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen (`better: "high"` oder `"low"`).
+3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen (`better: "high"` oder `"low"`). Für die Bestenliste das Spiel auch in `GAMES` in `src/worker.js` eintragen (mit erlaubtem Wertebereich).
 4. Optional eine Vorschau in `docs/assets/js/previews.js` unter `PREVIEW.<id>` zeichnen.
 
 ## Veröffentlichen

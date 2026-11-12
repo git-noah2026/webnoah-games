@@ -31,7 +31,7 @@
       if (ball.y > H + BR) {
         lives--;
         if (lives <= 0) {
-          state = "over";
+          state = "over"; ui.clearSave();
           const rec = ui.submit(score) && score > 0;
           c.show("Keine Bälle mehr", `${score} Punkte · Level ${level}`, "Nochmal", () => { c.hide(); newGame(); }, rec ? "Neuer Rekord!" : "");
         } else { stick(); state = "ready"; }
@@ -46,7 +46,7 @@
         const ox = Math.min(ball.x + BR - b.x, b.x + BW - (ball.x - BR));
         const oy = Math.min(ball.y + BR - b.y, b.y + BH - (ball.y - BR));
         if (ox < oy) ball.vx = -ball.vx; else ball.vy = -ball.vy;
-        if (bricks.every(k => !k.on)) { level++; build(); stick(); state = "ready"; }
+        if (bricks.every(k => !k.on)) { level++; build(); stick(); state = "ready"; ui.save({ level, score, lives }); }
         return true;
       }
       return false;
@@ -93,9 +93,16 @@
       else if (e.key === " ") { e.preventDefault(); if (c.ov.hidden) launch(); }
     });
     ui.onKeyUp(e => { if (isL(e.key)) keys.l = false; if (isR(e.key)) keys.r = false; });
-    ui.onRestart(() => { c.hide(); newGame(); });
+    ui.onRestart(() => { c.hide(); ui.clearSave(); newGame(); });
     newGame();
-    c.show("Ziegelbrecher", "Maus, Finger oder Pfeiltasten steuern den Schläger. Drei Bälle, jedes Level wird schneller.", "Los geht’s", () => c.hide());
+    function resume(sv) { level = sv.level; score = sv.score; lives = sv.lives; ui.score(score); build(); stick(); state = "ready"; }
+    const saved = ui.load();
+    if (saved && saved.level > 1 && saved.lives > 0) {
+      c.show("Weiterspielen?", `Dein Spielstand: Level ${saved.level}, ${saved.score} Punkte, ${saved.lives} ${saved.lives === 1 ? "Ball" : "Bälle"}.`,
+        `Weiter bei Level ${saved.level}`, () => { c.hide(); resume(saved); }, "", ["Neu beginnen", () => { c.hide(); ui.clearSave(); newGame(); }]);
+    } else {
+      c.show("Ziegelbrecher", "Maus, Finger oder Pfeiltasten steuern den Schläger. Drei Bälle, jedes Level wird schneller. Erreichte Level werden gespeichert.", "Los geht’s", () => c.hide());
+    }
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
   }

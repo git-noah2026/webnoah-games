@@ -1,12 +1,22 @@
-// Cloudflare Workers: liefert den Ordner docs/ als statische Seite aus.
-// Deploy: npx wrangler deploy (kein Build-Schritt nötig)
+// Cloudflare Workers: docs/ als statische Seite, /api/* über src/worker.js mit D1-Datenbank.
+// Deploy: npx wrangler deploy (kein Build-Schritt nötig). Tabellen legt der Worker selbst an.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "webnoah-games",
+  "main": "src/worker.js",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./docs",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
-  }
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "webnoah-games"
+    }
+  ],
+  "observability": { "enabled": true }
 }

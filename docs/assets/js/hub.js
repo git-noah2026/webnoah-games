@@ -130,4 +130,6 @@
     }
   }
   render();
+  // Nach dem Anmelden kommen Rekorde und Favoriten vom Server
+  document.addEventListener("wng:sync", render);
 })();
