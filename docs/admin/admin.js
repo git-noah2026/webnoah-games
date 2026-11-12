@@ -18,7 +18,7 @@
     return date(t);
   };
   const game = id => GAMES.find(g => g.id === id) || { id, name: id, unit: "" };
-  const variantName = v => v === "klein" ? "9 × 9" : v === "mittel" ? "12 × 12" : "";
+  const variantName = (v, id) => WNG.variantName(game(id), v);
   const n = v => Number(v || 0).toLocaleString("de-AT");
   const avatar = u => WNG.auth.avatar(u);
   const userLink = u => `<a class="adm-user" href="#nutzer/${encodeURIComponent(u.username)}">${avatar(u)}<span><b>${esc(u.display)}</b><small>@${esc(u.username)}</small></span></a>`;
@@ -197,7 +197,7 @@
         <section class="panel wide"><div class="panel-head"><h3>Rekorde</h3>
           ${d.records.length ? `<button class="btn danger-btn small-btn" type="button" id="b-recs-all">Alle Rekorde löschen</button>` : ""}</div>
           ${d.records.length ? `<div class="table-wrap"><table class="adm-table"><thead><tr><th>Spiel</th><th class="num">Wert</th><th>Partien</th><th>Erreicht</th><th></th></tr></thead><tbody>
-            ${d.records.map(r => { const st = d.stats.find(s => s.game === r.game); return `<tr><td>${esc(game(r.game).name)} ${variantName(r.variant) ? `<small class="muted">${variantName(r.variant)}</small>` : ""}</td>
+            ${d.records.map(r => { const st = d.stats.find(s => s.game === r.game); return `<tr><td>${esc(game(r.game).name)} ${variantName(r.variant, r.game) ? `<small class="muted">${variantName(r.variant, r.game)}</small>` : ""}</td>
               <td class="num"><mark>${fmt(game(r.game), r.value)}</mark></td><td>${st ? n(st.plays) : "–"}</td><td>${stamp(r.updated)}</td>
               <td class="num"><button class="btn small-btn" type="button" data-rec="${r.game}|${r.variant}">Löschen</button></td></tr>`; }).join("")}
           </tbody></table></div>` : `<p class="muted">Keine Rekorde.</p>`}</section>
@@ -265,7 +265,7 @@
       </div>
       <div id="lb-body"><p class="muted">Lade …</p></div>`;
     $("#lb-game").onchange = e => { lb.game = e.target.value; lb.variant = game(lb.game).variant || ""; viewBoards(); };
-    if (lb.game === "minen") segmented($("#lb-var"), [["klein", "9 × 9"], ["mittel", "12 × 12"]], lb.variant, v => { lb.variant = v; loadBoard(); });
+    if (game(lb.game).variants) segmented($("#lb-var"), game(lb.game).variants, lb.variant, v => { lb.variant = v; loadBoard(); });
     await loadBoard();
   }
   async function loadBoard() {

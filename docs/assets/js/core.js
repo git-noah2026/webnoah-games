@@ -20,6 +20,7 @@
   };
   const bestKey = (id, v) => "wng:" + id + (v ? ":" + v : "");
   const fmt = (g, v) => g.unit ? `${v} ${g.unit}` : `${v}`;
+  const variantName = (g, v) => ((g && g.variants) || []).reduce((out, [k, l]) => k === v ? l : out, "");
   const favs = {
     all: () => store.get("wng:favs") || [],
     has: id => favs.all().includes(id),
@@ -152,6 +153,6 @@
     if (t) t.textContent = `${two(now.getHours())}:${two(now.getMinutes())}`;
   }
 
-  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, fmt, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
+  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, fmt, variantName, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", chrome); else chrome();
 })();

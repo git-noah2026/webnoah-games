@@ -17,6 +17,10 @@ Ein Projekt der WebNoah Services GmbH, aus der WebNoah+ Familie.
 | Kometenrennen | `docs/spiele/rennen/` | Karten & Brett, Zu zweit |
 | Solitär | `docs/spiele/solitaer/` | Karten & Brett |
 | Schiffe versenken | `docs/spiele/schiffe/` | Strategie |
+| Mühle | `docs/spiele/muehle/` | Karten & Brett, Zu zweit |
+| Sudoku (3 Stufen) | `docs/spiele/sudoku9/` | Logik |
+| Wortjagd | `docs/spiele/wortjagd/` | Denkspiele |
+| Andersfarbig | `docs/spiele/farbton/` | Kurze Spiele |
 | Krieg der Adligen | extern auf games.webnoah.andrerer.org | Strategie |
 | Sudoku Solver | extern auf games.webnoah.andrerer.org | Logik |
 
@@ -93,7 +97,7 @@ docs/spiele/<id>/          eine Seite pro Spiel: index.html + game.js
    - `ui.onKey(fn)`, `ui.onKeyUp(fn)`, `ui.onRestart(fn)` für Tasten und den Neu-starten-Knopf
    - `ui.tools` als Platz für Umschalter über dem Spielfeld
    Die Funktion darf eine Aufräumfunktion zurückgeben.
-3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen (`better: "high"` oder `"low"`). Für die Bestenliste das Spiel auch in `GAMES` in `src/worker.js` eintragen (mit erlaubtem Wertebereich).
+3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen (`better: "high"` oder `"low"`). Spiele mit getrennten Bestenlisten pro Stufe bekommen `variants: [["id", "Name"], …]` und `variant` für die Standardstufe. Für die Bestenliste das Spiel auch in `GAMES` in `src/worker.js` eintragen (mit erlaubtem Wertebereich).
 4. Optional eine Vorschau in `docs/assets/js/previews.js` unter `PREVIEW.<id>` zeichnen.
 
 ## Veröffentlichen

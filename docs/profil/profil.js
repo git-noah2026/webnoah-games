@@ -7,7 +7,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const main = $("#profile");
   const date = t => new Date(t).toLocaleDateString("de-AT", { day: "numeric", month: "long", year: "numeric" });
-  const variantName = v => v === "klein" ? "9 × 9" : v === "mittel" ? "12 × 12" : "";
+  const variantName = (v, id) => WNG.variantName(GAMES.find(g => g.id === id), v);
 
   function message(title, text, withLogin) {
     main.innerHTML = `<div class="notice"><h1 class="display">${title}</h1><p>${text}</p>${withLogin ? `<button class="btn primary" type="button" data-login>Anmelden oder registrieren</button>` : ""}</div>`;
@@ -49,7 +49,7 @@
           <thead><tr><th>Spiel</th><th>Rekord</th><th>Partien</th><th>Zuletzt</th></tr></thead>
           <tbody>${recRows.map(({ g, r }) => {
             const st = statOf(g.id);
-            return `<tr><td><a href="${root}spiele/${g.id}/">${g.name}</a>${variantName(r.variant) ? ` <small>${variantName(r.variant)}</small>` : ""}</td>
+            return `<tr><td><a href="${root}spiele/${g.id}/">${g.name}</a>${variantName(r.variant, g.id) ? ` <small>${variantName(r.variant, g.id)}</small>` : ""}</td>
               <td><mark>${fmt(g, r.value)}</mark></td><td>${st ? st.plays : "–"}</td><td>${date(r.updated)}</td></tr>`;
           }).join("")}</tbody></table></div>`
           : `<p class="lb-empty">${own ? "Noch keine Rekorde. Such dir ein Spiel aus und leg los." : "Noch keine Rekorde."}</p>`}

@@ -227,7 +227,7 @@
     c.cv.addEventListener("pointerdown", e => {
       if (state !== "aim" || !c.ov.hidden) return;
       const pt = c.pt(e); aim = { sx: pt.x, sy: pt.y, cur: pt }; kbAim.on = false;
-      c.cv.setPointerCapture(e.pointerId);
+      try { c.cv.setPointerCapture(e.pointerId); } catch { /* ohne Capture geht es auch */ }
     });
     c.cv.addEventListener("pointermove", e => { if (aim) aim.cur = c.pt(e); });
     const letGo = e => {

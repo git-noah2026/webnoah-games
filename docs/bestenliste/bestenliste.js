@@ -19,7 +19,7 @@
   async function load() {
     tabs.querySelectorAll(".cat").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === game.id)));
     vars.innerHTML = "";
-    if (game.id === "minen") segmented(vars, [["klein", "Klein · 9 × 9"], ["mittel", "Mittel · 12 × 12"]], variant, v => { variant = v; load(); });
+    if (game.variants) segmented(vars, game.variants, variant, v => { variant = v; load(); });
     const auth = await WNG.auth.ready;
     if (!auth.available) { out.innerHTML = `<p class="lb-empty">Bestenlisten gibt es nur auf der Hauptadresse von WebNoah-Games, wo der Server läuft.</p>`; return; }
     const my = ++seq;

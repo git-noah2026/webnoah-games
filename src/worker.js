@@ -17,7 +17,11 @@ const GAMES = {
   solitaer: { better: "low", variants: [""], min: 20, max: 36000 },
   schiffe: { better: "low", variants: [""], min: 17, max: 100 },
   minigolf: { better: "low", variants: [""], min: 6, max: 54 },
-  rennen: { better: "high", variants: [""], min: 0, max: 100000 }
+  rennen: { better: "high", variants: [""], min: 0, max: 100000 },
+  muehle: { better: "high", variants: [""], min: 0, max: 100000 },
+  sudoku9: { better: "low", variants: ["leicht", "mittel", "schwer"], min: 30, max: 36000 },
+  wortjagd: { better: "low", variants: [""], min: 15, max: 36000 },
+  farbton: { better: "high", variants: [""], min: 0, max: 300 }
 };
 const COLORS = ["#38bdf8", "#ff6b5e", "#4ade80", "#e2b552", "#a78bfa", "#2fb3a6", "#f472b6", "#94a3b8"];
 const COOKIE = "wng_session";

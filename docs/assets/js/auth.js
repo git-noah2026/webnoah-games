@@ -4,7 +4,7 @@
   "use strict";
   const { $, h, store, bestKey, root } = WNG;
   const GAMES = () => (window.WNG_GAMES || []).filter(g => !g.ext);
-  const variantsOf = g => g.id === "minen" ? ["klein", "mittel"] : [""];
+  const variantsOf = g => g.variants ? g.variants.map(v => v[0]) : [""];
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   const auth = { user: null, available: false };

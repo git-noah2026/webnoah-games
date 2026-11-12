@@ -162,7 +162,7 @@
       if (pid === "waste" && idx !== S.waste.length - 1) return;
       e.preventDefault();
       press = { x: e.clientX, y: e.clientY, pid, idx, id: e.pointerId };
-      root.setPointerCapture(e.pointerId);
+      try { root.setPointerCapture(e.pointerId); } catch { /* ohne Capture geht es auch */ }
     });
     root.addEventListener("pointermove", e => {
       if (!press || e.pointerId !== press.id) return;

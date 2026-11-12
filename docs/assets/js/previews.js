@@ -275,5 +275,81 @@
     }
   });
 
+
+  /* ---------- Vorschauen: Mühle, Sudoku, Wortjagd, Andersfarbig ---------- */
+  Object.assign(PREVIEW, {
+    muehle(x, w, hh, t, p) {
+      x.fillStyle = "#0b1224"; x.fillRect(0, 0, w, hh);
+      const s = Math.min(w, hh) * .8, ox = (w - s) / 2, oy = (hh - s) / 2, st = s / 6;
+      x.strokeStyle = p.marker; x.lineWidth = 2;
+      for (const k of [0, 1, 2]) x.strokeRect(ox + k * st, oy + k * st, s - 2 * k * st, s - 2 * k * st);
+      x.beginPath();
+      x.moveTo(ox + 3 * st, oy); x.lineTo(ox + 3 * st, oy + 2 * st); x.moveTo(ox + 3 * st, oy + 4 * st); x.lineTo(ox + 3 * st, oy + s);
+      x.moveTo(ox, oy + 3 * st); x.lineTo(ox + 2 * st, oy + 3 * st); x.moveTo(ox + 4 * st, oy + 3 * st); x.lineTo(ox + s, oy + 3 * st);
+      x.stroke();
+      const P = [[0, 0], [3, 0], [6, 0], [1, 1], [3, 1], [5, 1], [2, 2], [3, 2], [4, 2], [0, 3], [1, 3], [2, 3], [4, 3], [5, 3], [6, 3], [2, 4], [3, 4], [4, 4], [1, 5], [3, 5], [5, 5], [0, 6], [3, 6], [6, 6]];
+      const seq = [[4, 1], [16, 2], [1, 1], [19, 2], [7, 1], [10, 2], [13, 1], [22, 2]];
+      const n = Math.floor(t * 1.4) % (seq.length + 4);
+      for (const [i] of P.entries()) { const [a, b] = P[i]; x.fillStyle = "#0b1224"; x.beginPath(); x.arc(ox + a * st, oy + b * st, 3.5, 0, 6.283); x.fill(); x.strokeStyle = p.marker; x.lineWidth = 1.5; x.stroke(); }
+      seq.slice(0, Math.min(n, seq.length)).forEach(([i, pl], k) => {
+        const [a, b] = P[i], drop = k === n - 1 ? Math.max(0, 1 - (t * 1.4 % 1) * 3) * 10 : 0;
+        x.fillStyle = pl === 1 ? p.c[0] : p.c[1];
+        x.beginPath(); x.arc(ox + a * st, oy + b * st - drop, st * .26, 0, 6.283); x.fill();
+      });
+      if (n >= 5 && n < seq.length + 4) { // Mühle 1-4-7 leuchtet
+        x.strokeStyle = "rgba(226,181,82,.8)"; x.lineWidth = st * .5; x.globalAlpha = .25 + .2 * Math.sin(t * 6); x.lineCap = "round";
+        x.beginPath(); x.moveTo(ox + 3 * st, oy); x.lineTo(ox + 3 * st, oy + 2 * st); x.stroke(); x.globalAlpha = 1;
+      }
+    },
+    sudoku9(x, w, hh, t, p) {
+      x.fillStyle = p.sheet; x.fillRect(0, 0, w, hh);
+      const s = Math.floor(Math.min((w - 30) / 9, (hh - 22) / 9)), ox = Math.round((w - s * 9) / 2), oy = Math.round((hh - s * 9) / 2);
+      const val = i => { const r = (i / 9) | 0, c = i % 9; return ((r * 3 + ((r / 3) | 0) + c + 4) % 9) + 1; };
+      const given = i => ((i * 53 + 7) % 9) < 4;
+      const sel = Math.floor(t * .9) % 81, selR = (sel / 9) | 0, selC = sel % 9;
+      x.fillStyle = "rgba(56,189,248,.07)";
+      for (let k = 0; k < 9; k++) { x.fillRect(ox + k * s, oy + selR * s, s, s); x.fillRect(ox + selC * s, oy + k * s, s, s); }
+      x.fillStyle = "rgba(226,181,82,.25)"; x.fillRect(ox + selC * s, oy + selR * s, s, s);
+      x.textAlign = "center"; x.textBaseline = "middle"; x.font = `600 ${Math.round(s * .55)}px 'IBM Plex Mono', monospace`;
+      for (let i = 0; i < 81; i++) {
+        const filled = given(i) || i < sel;
+        if (!filled) continue;
+        x.fillStyle = given(i) ? p.fg : p.marker;
+        x.fillText(val(i), ox + (i % 9) * s + s / 2, oy + ((i / 9) | 0) * s + s / 2 + 1);
+      }
+      for (let i = 0; i <= 9; i++) {
+        x.strokeStyle = i % 3 ? "rgba(255,255,255,.1)" : "rgba(226,181,82,.6)"; x.lineWidth = i % 3 ? 1 : 1.6;
+        x.beginPath(); x.moveTo(ox + i * s, oy); x.lineTo(ox + i * s, oy + 9 * s); x.moveTo(ox, oy + i * s); x.lineTo(ox + 9 * s, oy + i * s); x.stroke();
+      }
+    },
+    wortjagd(x, w, hh, t, p) {
+      x.fillStyle = p.sheet; x.fillRect(0, 0, w, hh);
+      const n = 9, s = Math.min((w - 24) / n, (hh - 20) / n), ox = (w - s * n) / 2, oy = (hh - s * n) / 2;
+      const letters = "KOMETRAFEPLANETSULDMONDNIEGALAXIEBORTSTERNUHNEBELKAMRAKETEOWISONNEFRDTELESKOPIAUZ";
+      const words = [[[0, 0], [1, 0], 5, "#38bdf8"], [[0, 2], [1, 1], 6, "#e2b552"], [[8, 1], [0, 1], 6, "#ff6b5e"], [[2, 8], [1, -1], 5, "#4ade80"]];
+      const shown = Math.floor(t * .6) % (words.length + 2);
+      words.slice(0, shown).forEach(([[sx, sy], [dx, dy], len, col], k) => {
+        const prog = k === shown - 1 ? Math.min(1, (t * .6 % 1) * 2.2) : 1;
+        x.strokeStyle = col; x.globalAlpha = .35; x.lineWidth = s * .78; x.lineCap = "round";
+        x.beginPath(); x.moveTo(ox + (sx + .5) * s, oy + (sy + .5) * s);
+        x.lineTo(ox + (sx + dx * (len - 1) * prog + .5) * s, oy + (sy + dy * (len - 1) * prog + .5) * s); x.stroke(); x.globalAlpha = 1;
+      });
+      x.textAlign = "center"; x.textBaseline = "middle"; x.font = `700 ${Math.round(s * .5)}px 'IBM Plex Mono', monospace`; x.fillStyle = "#c8d0e0";
+      for (let i = 0; i < n * n; i++) x.fillText(letters[i % letters.length], ox + (i % n + .5) * s, oy + (((i / n) | 0) + .5) * s + 1);
+    },
+    farbton(x, w, hh, t, p) {
+      x.fillStyle = "#0b1224"; x.fillRect(0, 0, w, hh);
+      const round = Math.floor(t * .8), n = 3 + (round % 4), gap = 4;
+      const s = Math.min((w - 30 - gap * (n - 1)) / n, (hh - 30 - gap * (n - 1)) / n), ox = (w - (s * n + gap * (n - 1))) / 2, oy = (hh - (s * n + gap * (n - 1))) / 2;
+      const hue = (round * 67) % 360, odd = (round * 7) % (n * n), d = 16 - (round % 4) * 3;
+      const pulse = (t * .8) % 1 > .7;
+      for (let i = 0; i < n * n; i++) {
+        x.fillStyle = `hsl(${hue} 62% ${i === odd ? 50 + d : 50}%)`;
+        rr(x, ox + (i % n) * (s + gap), oy + ((i / n) | 0) * (s + gap), s, s, 6); x.fill();
+        if (i === odd && pulse) { x.strokeStyle = p.marker; x.lineWidth = 3; x.stroke(); }
+      }
+    }
+  });
+
   WNG.PREVIEW = PREVIEW;
 })();

@@ -2,7 +2,38 @@
 // ext: Spiel liegt woanders und wird in einem neuen Tab geöffnet.
 window.WNG_GAMES = [
   {
-    id: "minigolf", name: "Minigolf", isNew: true, mins: 6, players: "1 Spieler", spotlight: 0,
+    id: "muehle", name: "Mühle", isNew: true, mins: 12, players: "1–2 Spieler", spotlight: 0,
+    cats: ["Karten & Brett", "Strategie", "Zu zweit"],
+    desc: "Der Brettspiel-Klassiker: Mühlen bauen, Steine nehmen, den Gegner einsperren.",
+    long: "Neun Steine setzen, dann ziehen und am Ende springen. Drei in einer Reihe sind eine Mühle und kosten den Gegner einen Stein. Gegen einen Computer, der vier Züge vorausdenkt, oder zu zweit.",
+    controls: "Klick · Touch", scoreLabel: "Siege", bestLabel: "Siege", better: "high", unit: "",
+    help: "Setzphase: freies Feld antippen. Zugphase: eigenen Stein wählen, dann ein Nachbarfeld. Mit drei Steinen darfst du springen. Nach einer Mühle einen rot markierten Stein antippen. 60 Züge ohne Schlag sind unentschieden. Gezählt werden deine Siege gegen den Computer."
+  },
+  {
+    id: "sudoku9", name: "Sudoku", isNew: true, mins: 15, players: "1 Spieler", spotlight: 1,
+    variant: "leicht", variantLabel: "Leicht", variants: [["leicht", "Leicht"], ["mittel", "Mittel"], ["schwer", "Schwer"]],
+    cats: ["Logik", "Denkspiele"],
+    desc: "Jedes Rätsel frisch erzeugt, mit genau einer Lösung. Drei Stufen, Notizen, Tipps.",
+    long: "Jedes Rätsel wird neu gebaut und hat genau eine Lösung. Leicht, mittel oder schwer, mit Notizen für Kandidaten, Tipps gegen Zeitstrafe und automatisch gespeichertem Spielstand.",
+    controls: "Klick · Ziffern · Pfeile", scoreLabel: "Sekunden", better: "low", unit: "s",
+    help: "Feld wählen, Zahl tippen (oder Ziffer drücken). N schaltet Notizen um, Pfeiltasten bewegen die Auswahl. Rot heißt: doppelt in Zeile, Spalte oder Block. Ein Tipp kostet 30 Sekunden. Rekorde gibt es pro Stufe."
+  },
+  {
+    id: "wortjagd", name: "Wortjagd", isNew: true, mins: 5, players: "1 Spieler",
+    cats: ["Denkspiele", "Kurze Spiele"],
+    desc: "Zehn Wörter zu einem Thema im Buchstabengitter, kreuz und quer und rückwärts.",
+    controls: "Ziehen · Tippen", scoreLabel: "Sekunden", better: "low", unit: "s",
+    help: "Über ein Wort ziehen oder erst den Anfang, dann das Ende antippen. Wörter liegen waagrecht, senkrecht und schräg, auch rückwärts. Gewertet wird die Zeit."
+  },
+  {
+    id: "farbton", name: "Andersfarbig", isNew: true, mins: 1, players: "1 Spieler",
+    cats: ["Kurze Spiele", "Geschicklichkeit"],
+    desc: "Ein Feld hat einen anderen Farbton. Wie viele findest du in 60 Sekunden?",
+    controls: "Klick · Touch", scoreLabel: "Treffer", better: "high", unit: "Treffer",
+    help: "Tipp auf das Feld, das anders aussieht. Jede Runde wird das Gitter größer und der Unterschied kleiner. Falsch getippt kostet 3 Sekunden."
+  },
+  {
+    id: "minigolf", name: "Minigolf", mins: 6, players: "1 Spieler", spotlight: 2,
     cats: ["Geschicklichkeit", "Action"],
     desc: "Sechs Bahnen unterm Sternenhimmel: Banden, Sand, Teiche und ein Pendel.",
     long: "Zieh vom Ball weg, wähl die Stärke, lass los. Sechs eigene Bahnen mit Banden, Sandkasten, Teich und beweglicher Sperre. Wer Wasser trifft, zahlt einen Strafschlag.",
@@ -10,7 +41,7 @@ window.WNG_GAMES = [
     help: "Vom Ball weg ziehen und loslassen, je weiter, desto fester. Tastatur: ← → zielen, ↑ ↓ Stärke, Leertaste schlagen. Wasser kostet einen Strafschlag, nach 8 Schlägen wird der Ball aufgehoben. Deine Runde wird nach jeder Bahn gespeichert."
   },
   {
-    id: "rennen", name: "Kometenrennen", isNew: true, mins: 10, players: "2–4 Spieler", spotlight: 1,
+    id: "rennen", name: "Kometenrennen", mins: 10, players: "2–4 Spieler",
     cats: ["Karten & Brett", "Zu zweit", "Strategie"],
     desc: "Würfeln, Wurmlöcher nutzen, Kometen ausweichen. Gegen Computer oder zu viert.",
     long: "Zwei Raketen pro Farbe, eine Runde mit 40 Feldern. Sterne schieben dich vor, Wurmlöcher werfen dich quer übers Brett, Kometen zurück. Wer auf einer fremden Rakete landet, schickt sie heim.",
@@ -18,14 +49,14 @@ window.WNG_GAMES = [
     help: "Würfeln mit Knopf, Klick auf den Würfel oder Leertaste. Dann eine leuchtende Rakete antippen (oder 1/2 drücken). ★ bringt drei Felder, ◎ springt zum anderen Wurmloch, ☄ wirft vier Felder zurück. Eine 6 gibt einen Extrawurf. Gezählt werden deine Siege gegen den Computer."
   },
   {
-    id: "solitaer", name: "Solitär", isNew: true, mins: 8, players: "1 Spieler",
+    id: "solitaer", name: "Solitär", mins: 8, players: "1 Spieler",
     cats: ["Karten & Brett", "Denkspiele"],
     desc: "Der Kartenklassiker: Spalten abwechselnd nach Farbe ordnen, Asse ablegen.",
     controls: "Ziehen · Tippen · Leertaste", scoreLabel: "Sekunden", better: "low", unit: "s",
     help: "Karte antippen legt sie automatisch an die beste Stelle, oder zieh sie hin. Spalten: abwechselnd rot und schwarz, absteigend. Leere Spalten nur mit König. Stapel antippen oder Leertaste zieht eine Karte, Z macht rückgängig. Gewertet wird die Zeit."
   },
   {
-    id: "schiffe", name: "Schiffe versenken", isNew: true, mins: 7, players: "1 Spieler",
+    id: "schiffe", name: "Schiffe versenken", mins: 7, players: "1 Spieler",
     cats: ["Strategie", "Denkspiele"],
     desc: "Flotte aufstellen und die des Computers finden, bevor er deine findet.",
     controls: "Klick · R zum Drehen", scoreLabel: "Schüsse", better: "low", unit: "Schüsse",
@@ -54,7 +85,7 @@ window.WNG_GAMES = [
     help: "Steine fallen nach unten. Vier gleiche waagrecht, senkrecht oder schräg gewinnen. Gezählt werden deine Siege gegen den Computer."
   },
   {
-    id: "minen", name: "Minenfeld", mins: 8, players: "1 Spieler", variant: "klein", variantLabel: "9×9",
+    id: "minen", name: "Minenfeld", mins: 8, players: "1 Spieler", variant: "klein", variantLabel: "9×9", variants: [["klein", "9 × 9"], ["mittel", "12 × 12"]],
     cats: ["Logik", "Denkspiele"],
     desc: "Zahlen verraten, wie viele Minen angrenzen. Räum das Feld.",
     controls: "Klick · Rechtsklick · Halten", scoreLabel: "Sekunden", better: "low", unit: "s",
@@ -76,7 +107,7 @@ window.WNG_GAMES = [
     help: "Gewertet wird der Durchschnitt aus fünf Runden. Zu frühes Tippen wiederholt die Runde."
   },
   {
-    id: "adlige", name: "Krieg der Adligen", mins: 15, players: "1–2 Spieler", spotlight: 2,
+    id: "adlige", name: "Krieg der Adligen", mins: 15, players: "1–2 Spieler",
     ext: "https://games.webnoah.andrerer.org/krieg-der-adeligen/index.html",
     cats: ["Strategie", "Zu zweit", "Karten & Brett"],
     desc: "Strategie auf dem Brett. Zu zweit oder gegen die KI in drei Stufen.",

@@ -33,7 +33,7 @@
     if (!auth || !auth.available) { board.hidden = true; return; }
     board.hidden = false;
     const seq = ++lbSeq;
-    const label = g.variantLabel && variant ? ` · ${variant === "klein" ? "9 × 9" : "12 × 12"}` : "";
+    const label = g.variants && variant ? ` · ${WNG.variantName(g, variant)}` : "";
     board.innerHTML = `<div class="lb-head"><h2 class="display">Bestenliste${label}</h2><a href="${root}bestenliste/?spiel=${id}">Alle Bestenlisten →</a></div><p class="lb-empty">Lade …</p>`;
     try {
       const data = await auth.api(`leaderboard?game=${id}&variant=${encodeURIComponent(variant)}`);
