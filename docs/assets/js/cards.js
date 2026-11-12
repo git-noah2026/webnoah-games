@@ -54,10 +54,11 @@
     const target = g.ext ? ` target="_blank" rel="noopener"` : "";
     el.innerHTML = `
       <a class="card-link" href="${href(g)}"${target}>
-        <div class="thumb">
+        <div class="thumb gild">
           <canvas aria-hidden="true"></canvas>
           <span class="badges"><span class="dur">≈ ${g.mins} Min</span>${g.isNew ? `<span class="new">Neu</span>` : ""}</span>
           ${g.ext ? `<span class="ext">Original ↗</span>` : ""}
+          <span class="play-chip" aria-hidden="true">${g.ext ? "Öffnen ↗" : "Spielen ▸"}</span>
         </div>
         <div class="card-body">
           <div class="tags"><span>${g.cats[0]}</span><span>${g.players}</span></div>

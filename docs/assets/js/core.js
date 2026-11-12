@@ -116,7 +116,7 @@
     <nav class="nav" aria-label="Hauptnavigation">
       <a href="${root}#spiele">Spiele</a>
       <a href="${root}bestenliste/">Bestenliste</a>
-      <a href="${root}#pause">Pausenplan</a>
+      <a href="${root}#mitmachen">Mitmachen</a>
     </nav>
     <div class="clock"><span id="clock-day"></span><b id="clock-time"></b></div>
     <div id="account-slot"></div>

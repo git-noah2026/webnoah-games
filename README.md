@@ -50,7 +50,7 @@ Dann `http://localhost:8000` öffnen. Mit Konten, API und lokaler Datenbank: `np
 ```
 src/worker.js              API für Konten, Rekorde, Bestenliste (Cloudflare Worker + D1)
 wrangler.jsonc             Cloudflare-Konfiguration
-docs/index.html            Startseite: Rampenlicht, Pausenplan, Suche, Kategorien, Favoriten
+docs/index.html            Startseite: Bühne mit Rampenlicht, Bibliothek mit Suche und Kategorien, Ruhmeshalle
 docs/404.html              Fehlerseite für GitHub Pages
 docs/assets/css/site.css   gemeinsames Design (Farben, Schriften, alle Bausteine)
 docs/assets/js/core.js     Helfer, Speicher, Kopf- und Fußzeile
