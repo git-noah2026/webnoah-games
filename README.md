@@ -21,6 +21,10 @@ Ein Projekt der WebNoah Services GmbH, aus der WebNoah+ Familie.
 | Sudoku (3 Stufen) | `docs/spiele/sudoku9/` | Logik |
 | Wortjagd | `docs/spiele/wortjagd/` | Denkspiele |
 | Andersfarbig | `docs/spiele/farbton/` | Kurze Spiele |
+| Reichenspiel | `docs/spiele/reich/` | Karten & Brett, Strategie |
+| Steine schmeißen | `docs/spiele/steine/` | Action |
+| Heast chü amoi | `docs/spiele/heast/` | Karten & Brett, Zu zweit |
+| Hüpfer | `docs/spiele/huepfer/` | Action, Kurze Spiele |
 | Krieg der Adligen | extern auf games.webnoah.andrerer.org | Strategie |
 | Sudoku Solver | extern auf games.webnoah.andrerer.org | Logik |
 
@@ -65,7 +69,7 @@ oder
 python -m http.server 8000 -d docs
 ```
 
-Dann `http://localhost:8000` öffnen. Mit Konten, API und lokaler Datenbank: `npx wrangler dev`, danach `http://localhost:8787`. Die Fehlerseite `404.html` nutzt absolute Pfade und funktioniert deshalb nur, wenn die Seite im Root einer Domain liegt.
+Dann `http://localhost:8000` öffnen. Mit Konten, API und lokaler Datenbank: `npx wrangler dev --persist-to %TEMP%/wng-state`, danach `http://localhost:8787`. Der Zustand liegt bewusst außerhalb des Projekts, weil OneDrive die SQLite-Dateien sonst sperrt. Die Fehlerseite `404.html` nutzt absolute Pfade und funktioniert deshalb nur, wenn die Seite im Root einer Domain liegt.
 
 ## Aufbau
 

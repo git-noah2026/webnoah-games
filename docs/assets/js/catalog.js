@@ -2,7 +2,38 @@
 // ext: Spiel liegt woanders und wird in einem neuen Tab geöffnet.
 window.WNG_GAMES = [
   {
-    id: "muehle", name: "Mühle", isNew: true, mins: 12, players: "1–2 Spieler", spotlight: 0,
+    id: "reich", name: "Reichenspiel", isNew: true, mins: 20, players: "2–4 Spieler", spotlight: 0,
+    cats: ["Karten & Brett", "Strategie", "Zu zweit"],
+    desc: "Firmen gründen, Branchen ausbauen, Marktnachrichten überstehen. Wer wird am reichsten?",
+    long: "Ein eigenes Wirtschafts-Brettspiel: Würfle ums Brett, gründe Firmen vom Würstelstand bis zum Raumfahrt-Start-up, bau ganze Branchen aus und kassier mit. Finanzamt, Glückstopf und Marktnachrichten mischen mit. Nach 20 Runden zählt das Vermögen.",
+    controls: "Klick · Leertaste", scoreLabel: "Siege", bestLabel: "Siege", better: "high", unit: "",
+    help: "Würfeln, dann freie Firmen gründen oder liegen lassen. Wer auf deiner Firma landet, zahlt dir mit, doppelt bei kompletter Branche. Mit kompletter Branche kannst du bis Stufe 3 ausbauen. Wer pleite ist, scheidet aus. Gezählt werden deine Siege gegen den Computer."
+  },
+  {
+    id: "steine", name: "Steine schmeißen", isNew: true, mins: 6, players: "1 Spieler", spotlight: 1,
+    cats: ["Action", "Geschicklichkeit"],
+    desc: "Fallende Brocken stapeln, volle Reihen räumen. Der Goldstein sprengt seine Reihe.",
+    long: "Acht eigene Steinformen aus drei und fünf Feldern fallen in einen elf Felder breiten Schacht. Volle Reihen verschwinden, Serien bringen Bonus, und ab und zu kommt ein Goldstein, der seine ganze Reihe sprengt.",
+    controls: "Pfeile · Leertaste · Wischen", scoreLabel: "Punkte", better: "high", unit: "P.",
+    help: "← → schieben, ↑ drehen, ↓ schneller, Leertaste schmeißt den Stein ganz nach unten, P pausiert. Am Handy: tippen dreht, seitlich wischen schiebt, nach unten wischen schmeißt, oder die Knöpfe nutzen."
+  },
+  {
+    id: "heast", name: "Heast chü amoi", isNew: true, mins: 15, players: "2–4 Spieler", spotlight: 2,
+    cats: ["Karten & Brett", "Zu zweit"],
+    desc: "Würfeln, rausschmeißen, heimbringen. Auf einem runden Brett, mit Schmäh.",
+    long: "Vier Figuren pro Farbe, mit einer 6 raus aus dem Haus, einmal ums runde Brett und ab ins Ziel. Wer auf einer fremden Figur landet, schickt sie heim, und die bekommt ihren Kommentar dazu.",
+    controls: "Klick · Leertaste · 1–4", scoreLabel: "Siege", bestLabel: "Siege", better: "high", unit: "",
+    help: "Würfeln, dann eine leuchtende Figur antippen (oder 1–4 drücken). Mit einer 6 kommt eine Figur aus dem Haus, und du würfelst nochmal. Ist keine Figur draußen, hast du drei Versuche. Ins Ziel genau einziehen, eigene Figuren werden nicht übersprungen. Gezählt werden deine Siege gegen den Computer."
+  },
+  {
+    id: "huepfer", name: "Hüpfer", isNew: true, mins: 2, players: "1 Spieler",
+    cats: ["Action", "Kurze Spiele", "Geschicklichkeit"],
+    desc: "Endlos laufen, über Kristalle springen, unter Satelliten ducken, Sterne sammeln.",
+    controls: "Leertaste · Tippen · ↓", scoreLabel: "Punkte", better: "high", unit: "P.",
+    help: "Leertaste, ↑ oder Tippen springt, zweimal schnell für einen Doppelsprung. ↓ oder nach unten wischen duckt dich unter Satelliten. Jeder Stern bringt 25 Punkte extra."
+  },
+  {
+    id: "muehle", name: "Mühle", mins: 12, players: "1–2 Spieler",
     cats: ["Karten & Brett", "Strategie", "Zu zweit"],
     desc: "Der Brettspiel-Klassiker: Mühlen bauen, Steine nehmen, den Gegner einsperren.",
     long: "Neun Steine setzen, dann ziehen und am Ende springen. Drei in einer Reihe sind eine Mühle und kosten den Gegner einen Stein. Gegen einen Computer, der vier Züge vorausdenkt, oder zu zweit.",
@@ -10,7 +41,7 @@ window.WNG_GAMES = [
     help: "Setzphase: freies Feld antippen. Zugphase: eigenen Stein wählen, dann ein Nachbarfeld. Mit drei Steinen darfst du springen. Nach einer Mühle einen rot markierten Stein antippen. 60 Züge ohne Schlag sind unentschieden. Gezählt werden deine Siege gegen den Computer."
   },
   {
-    id: "sudoku9", name: "Sudoku", isNew: true, mins: 15, players: "1 Spieler", spotlight: 1,
+    id: "sudoku9", name: "Sudoku", mins: 15, players: "1 Spieler",
     variant: "leicht", variantLabel: "Leicht", variants: [["leicht", "Leicht"], ["mittel", "Mittel"], ["schwer", "Schwer"]],
     cats: ["Logik", "Denkspiele"],
     desc: "Jedes Rätsel frisch erzeugt, mit genau einer Lösung. Drei Stufen, Notizen, Tipps.",
@@ -19,21 +50,21 @@ window.WNG_GAMES = [
     help: "Feld wählen, Zahl tippen (oder Ziffer drücken). N schaltet Notizen um, Pfeiltasten bewegen die Auswahl. Rot heißt: doppelt in Zeile, Spalte oder Block. Ein Tipp kostet 30 Sekunden. Rekorde gibt es pro Stufe."
   },
   {
-    id: "wortjagd", name: "Wortjagd", isNew: true, mins: 5, players: "1 Spieler",
+    id: "wortjagd", name: "Wortjagd", mins: 5, players: "1 Spieler",
     cats: ["Denkspiele", "Kurze Spiele"],
     desc: "Zehn Wörter zu einem Thema im Buchstabengitter, kreuz und quer und rückwärts.",
     controls: "Ziehen · Tippen", scoreLabel: "Sekunden", better: "low", unit: "s",
     help: "Über ein Wort ziehen oder erst den Anfang, dann das Ende antippen. Wörter liegen waagrecht, senkrecht und schräg, auch rückwärts. Gewertet wird die Zeit."
   },
   {
-    id: "farbton", name: "Andersfarbig", isNew: true, mins: 1, players: "1 Spieler",
+    id: "farbton", name: "Andersfarbig", mins: 1, players: "1 Spieler",
     cats: ["Kurze Spiele", "Geschicklichkeit"],
     desc: "Ein Feld hat einen anderen Farbton. Wie viele findest du in 60 Sekunden?",
     controls: "Klick · Touch", scoreLabel: "Treffer", better: "high", unit: "Treffer",
     help: "Tipp auf das Feld, das anders aussieht. Jede Runde wird das Gitter größer und der Unterschied kleiner. Falsch getippt kostet 3 Sekunden."
   },
   {
-    id: "minigolf", name: "Minigolf", mins: 6, players: "1 Spieler", spotlight: 2,
+    id: "minigolf", name: "Minigolf", mins: 6, players: "1 Spieler",
     cats: ["Geschicklichkeit", "Action"],
     desc: "Sechs Bahnen unterm Sternenhimmel: Banden, Sand, Teiche und ein Pendel.",
     long: "Zieh vom Ball weg, wähl die Stärke, lass los. Sechs eigene Bahnen mit Banden, Sandkasten, Teich und beweglicher Sperre. Wer Wasser trifft, zahlt einen Strafschlag.",

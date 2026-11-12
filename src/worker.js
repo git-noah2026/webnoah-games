@@ -21,7 +21,11 @@ const GAMES = {
   muehle: { better: "high", variants: [""], min: 0, max: 100000 },
   sudoku9: { better: "low", variants: ["leicht", "mittel", "schwer"], min: 30, max: 36000 },
   wortjagd: { better: "low", variants: [""], min: 15, max: 36000 },
-  farbton: { better: "high", variants: [""], min: 0, max: 300 }
+  farbton: { better: "high", variants: [""], min: 0, max: 300 },
+  steine: { better: "high", variants: [""], min: 0, max: 10000000 },
+  huepfer: { better: "high", variants: [""], min: 0, max: 5000000 },
+  heast: { better: "high", variants: [""], min: 0, max: 100000 },
+  reich: { better: "high", variants: [""], min: 0, max: 100000 }
 };
 const COLORS = ["#38bdf8", "#ff6b5e", "#4ade80", "#e2b552", "#a78bfa", "#2fb3a6", "#f472b6", "#94a3b8"];
 const COOKIE = "wng_session";

@@ -351,5 +351,95 @@
     }
   });
 
+
+  /* ---------- Vorschauen: Reichenspiel, Steine schmeißen, Heast chü amoi, Hüpfer ---------- */
+  const pvDie = (x, cx, cy, s, n) => {
+    x.fillStyle = "#f4f1e8"; rr(x, cx - s / 2, cy - s / 2, s, s, s * .18); x.fill();
+    const d = s * .26, pips = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] }[n];
+    x.fillStyle = "#121833"; for (const [a, b] of pips) { x.beginPath(); x.arc(cx + a * d, cy + b * d, s * .07, 0, 6.283); x.fill(); }
+  };
+  const pvStone = (x, px, py, s, hue) => {
+    const g = x.createLinearGradient(px, py, px + s, py + s);
+    if (hue < 0) { g.addColorStop(0, "#fff3c4"); g.addColorStop(.5, "#e2b552"); g.addColorStop(1, "#8a6420"); }
+    else { g.addColorStop(0, `hsl(${hue} 45% 62%)`); g.addColorStop(1, `hsl(${hue} 40% 34%)`); }
+    x.fillStyle = g; rr(x, px + 1, py + 1, s - 2, s - 2, s * .25); x.fill();
+  };
+  Object.assign(PREVIEW, {
+    reich(x, w, hh, t, p) {
+      x.fillStyle = "#0b1224"; x.fillRect(0, 0, w, hh);
+      const s = Math.min(w, hh) * .86, ox = (w - s) / 2, oy = (hh - s) / 2, cell = s / 8;
+      const hues = [28, 200, 150, 340, 265, 45, 185];
+      const pos = k => k <= 7 ? [7 - k, 7] : k <= 14 ? [0, 7 - (k - 7)] : k <= 21 ? [k - 14, 0] : [7, k - 21];
+      for (let k = 0; k < 28; k++) {
+        const [cx, cy] = pos(k), px = ox + cx * cell, py = oy + cy * cell;
+        x.fillStyle = "#162240"; x.fillRect(px + 1, py + 1, cell - 2, cell - 2);
+        if (k % 7 && ![4, 11, 18, 25].includes(k)) { x.fillStyle = `hsl(${hues[Math.floor(k / 4) % 7]} 55% 48%)`; x.fillRect(px + 1, py + 1, cell - 2, cell * .2); }
+        if ([2, 5, 9, 16, 19, 23].includes(k)) { x.strokeStyle = ["#38bdf8", "#ff6b5e", "#4ade80"][k % 3]; x.lineWidth = 2; x.strokeRect(px + 3, py + 3, cell - 6, cell - 6); }
+      }
+      x.strokeStyle = "rgba(226,181,82,.6)"; x.lineWidth = 1.2; x.strokeRect(ox + cell, oy + cell, s - 2 * cell, s - 2 * cell);
+      x.fillStyle = p.marker; x.font = `800 ${Math.round(cell * .48)}px Cinzel, Georgia, serif`; x.textAlign = "center"; x.textBaseline = "middle";
+      x.fillText("Reichenspiel", w / 2, oy + s * .36);
+      const r1 = 1 + Math.floor(t * 1.1) % 6, r2 = 1 + Math.floor(t * 1.1 + 2) % 6;
+      pvDie(x, w / 2 - cell * .62, oy + s * .58, cell * .9, r1); pvDie(x, w / 2 + cell * .62, oy + s * .58, cell * .9, r2);
+      // Spielfigur zieht ums Brett
+      const k = Math.floor(t * 2.2) % 28, [cx, cy] = pos(k);
+      x.fillStyle = "#e2b552"; x.beginPath(); x.arc(ox + (cx + .5) * cell, oy + (cy + .55) * cell - Math.abs(Math.sin(t * 7)) * 4, cell * .2, 0, 6.283); x.fill();
+      x.strokeStyle = "#fff"; x.lineWidth = 1.5; x.stroke();
+    },
+    steine(x, w, hh, t, p) {
+      x.fillStyle = "#0d1a33"; x.fillRect(0, 0, w, hh);
+      const cols = 11, s = Math.min((w - 20) / cols, (hh - 10) / 9), ox = (w - s * cols) / 2, rows = Math.floor((hh - 10) / s), oy = hh - 5 - rows * s;
+      x.strokeStyle = p.marker; x.lineWidth = 1.5; x.strokeRect(ox - 1, oy - 1, s * cols + 2, s * rows + 2);
+      const stack = ["00011100110", "01111101111", "11111111011"];
+      stack.forEach((r, i) => [...r].forEach((v, j) => { if (v === "1") pvStone(x, ox + j * s, oy + (rows - 3 + i) * s, s, [205, 160, 28, 280, 340, 120, 50, 250][(i * 3 + j) % 8]); }));
+      const ph = (t * .45) % 1, y = Math.floor(ph * (rows - 3)) - 1;
+      const shape = [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], px = 5;
+      for (const [a, b] of shape) if (y + b >= 0) pvStone(x, ox + (px + a) * s, oy + (y + b) * s, s, 28);
+      pvStone(x, ox + 9 * s, oy + Math.max(0, Math.floor(((t * .45 + .5) % 1) * (rows - 4))) * s, s, -1);
+    },
+    heast(x, w, hh, t, p) {
+      x.fillStyle = "#0b1224"; x.fillRect(0, 0, w, hh);
+      const cx = w / 2, cy = hh / 2, R = Math.min(w, hh) * .38, cols = [p.c[0], p.c[1], p.c[2], p.c[3]];
+      for (let i = 0; i < 40; i++) {
+        const a = -Math.PI / 2 + i / 40 * Math.PI * 2, fx = cx + Math.cos(a) * R, fy = cy + Math.sin(a) * R, own = i % 10 === 0;
+        x.fillStyle = own ? cols[i / 10] : "#1b2846"; x.globalAlpha = own ? .6 : 1;
+        x.beginPath(); x.arc(fx, fy, own ? 6 : 4.5, 0, 6.283); x.fill(); x.globalAlpha = 1;
+      }
+      for (let pl = 0; pl < 4; pl++) {
+        const prog = (Math.floor(t * (1.3 + pl * .25)) * 2 + pl * 10) % 40, a = -Math.PI / 2 + prog / 40 * Math.PI * 2;
+        x.fillStyle = cols[pl]; x.beginPath(); x.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R - Math.abs(Math.sin(t * 5 + pl)) * 3, 7, 0, 6.283); x.fill();
+        x.strokeStyle = "rgba(255,255,255,.7)"; x.lineWidth = 1.2; x.stroke();
+      }
+      pvDie(x, cx, cy - 6, R * .42, 1 + Math.floor(t * 1.3) % 6);
+      if ((t % 4) > 2.4) {
+        x.font = `700 ${Math.round(R * .14)}px Inter, sans-serif`; const txt = "Heast, chü amoi!", tw = x.measureText(txt).width + 16;
+        x.fillStyle = "#f4f1e8"; rr(x, cx - tw / 2, cy + R * .3, tw, R * .24, 8); x.fill();
+        x.fillStyle = "#121833"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(txt, cx, cy + R * .42);
+      }
+    },
+    huepfer(x, w, hh, t, p) {
+      const g = x.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, "#050a18"); g.addColorStop(1, "#14213d");
+      x.fillStyle = g; x.fillRect(0, 0, w, hh);
+      for (let i = 0; i < 30; i++) { x.fillStyle = p.fg; x.globalAlpha = .3 + (i % 3) * .2; x.fillRect(((i * 97 - t * 20 * (1 + i % 3)) % w + w) % w, (i * 53) % (hh * .6), 1.5, 1.5); }
+      x.globalAlpha = 1;
+      const ground = hh * .78;
+      x.fillStyle = "#1b2846"; x.fillRect(0, ground, w, hh - ground);
+      x.strokeStyle = p.marker; x.lineWidth = 2; x.beginPath(); x.moveTo(0, ground); x.lineTo(w, ground); x.stroke();
+      const per = 2.2, ph = (t % per) / per, cxst = w * (1.05 - ph * 1.25);
+      // Kristall
+      x.fillStyle = "#8b6ef0"; x.beginPath(); x.moveTo(cxst, ground); x.lineTo(cxst + 6, ground - hh * .16); x.lineTo(cxst + 12, ground - hh * .24); x.lineTo(cxst + 19, ground - hh * .14); x.lineTo(cxst + 24, ground); x.fill();
+      // Hüpfer springt, wenn der Kristall naht
+      const heroX = w * .26, dist = cxst - heroX, jump = dist < w * .22 && dist > -w * .12 ? Math.sin(Math.min(1, (w * .22 - dist) / (w * .34)) * Math.PI) : 0;
+      const r = hh * .085, by = ground - jump * hh * .38;
+      const hg = x.createRadialGradient(heroX - r * .3, by - r * 1.4, 1, heroX, by - r, r * 1.2); hg.addColorStop(0, "#fff3c4"); hg.addColorStop(.5, "#e2b552"); hg.addColorStop(1, "#a8782a");
+      x.fillStyle = hg; x.beginPath(); x.ellipse(heroX, by - r - 2, r, r, 0, 0, 6.283); x.fill();
+      x.fillStyle = "#0b2f3a"; rr(x, heroX - 1, by - r * 1.55, r * .95, r * .55, r * .25); x.fill();
+      x.fillStyle = "#2fe0cf"; x.beginPath(); x.arc(heroX + r * .55, by - r * 1.28, r * .15, 0, 6.283); x.fill();
+      // Stern
+      x.fillStyle = p.marker; x.save(); x.translate(((w * 1.4 - t * w * .45) % (w * 1.2) + w * 1.2) % (w * 1.2), hh * .32); x.rotate(t * 2);
+      x.beginPath(); for (let k = 0; k < 10; k++) { const rad = k % 2 ? 3.5 : 8, a = k * Math.PI / 5 - Math.PI / 2; x.lineTo(Math.cos(a) * rad, Math.sin(a) * rad); } x.closePath(); x.fill(); x.restore();
+    }
+  });
+
   WNG.PREVIEW = PREVIEW;
 })();

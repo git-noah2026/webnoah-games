@@ -927,3 +927,27 @@ textarea.input { width: 100%; resize: vertical; min-height: 80px; line-height: 1
 .ft-start b { font-size: clamp(1.8rem, 5vw, 2.6rem); }
 .ft-start p { margin: 0; color: var(--muted); max-width: 34ch; }
 .ft:not(.on) .ft-grid { filter: saturate(.7); }
+
+/* ================= Steine schmeißen ================= */
+.st-pad { grid-template-columns: repeat(4, 58px); grid-template-rows: 52px 46px; }
+.st-pad [data-a="rot"] { grid-column: 1; grid-row: 1; }
+.st-pad [data-a="left"] { grid-column: 2; grid-row: 1; }
+.st-pad [data-a="down"] { grid-column: 3; grid-row: 1; }
+.st-pad [data-a="right"] { grid-column: 4; grid-row: 1; }
+.st-pad .wide { grid-column: 1 / -1; grid-row: 2; font-size: 15px; }
+
+/* ================= Reichenspiel ================= */
+.rs-panel { width: min(100%, 760px); display: grid; gap: 14px; }
+.rs-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; min-height: 46px; padding: 12px; border-radius: 14px; background: var(--sheet-2); border: 1px solid rgb(226 181 82 / .35); }
+.rs-hint { margin: 0; flex-basis: 100%; text-align: center; color: var(--muted); }
+.rs-hint b { color: var(--fg); }
+.rs-ups { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; flex-basis: 100%; }
+.rs-players { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.rs-p { display: grid; gap: 2px; padding: 10px 14px; border-radius: 12px; background: var(--sheet); border: 1px solid var(--line); border-left: 4px solid var(--pc); }
+.rs-p.now { box-shadow: 0 0 0 1px var(--marker); }
+.rs-p.out { opacity: .45; }
+.rs-p .cash { font-family: var(--mono); font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }
+.rs-p small { color: var(--muted); font-size: 12px; }
+.rs-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.rs-log li:first-child { color: var(--fg); }
+.rs-log li::before { content: "› "; color: var(--marker); }
