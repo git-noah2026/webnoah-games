@@ -646,3 +646,84 @@ main { display: block; }
   .vitrine { animation: none; transform: none; }
   .gold-text { animation: none; }
 }
+
+/* ================= Solitär ================= */
+.sol { width: min(100%, 820px); display: grid; gap: clamp(10px, 2.4vw, 22px); user-select: none; -webkit-user-select: none; touch-action: none; container-type: inline-size; }
+.sol-top, .sol-tab { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(4px, 1.4cqw, 12px); align-items: start; }
+.pile { position: relative; aspect-ratio: 5 / 7; border-radius: clamp(4px, .9cqw, 8px); }
+.sol-top .pile { border: 1.5px dashed rgb(226 181 82 / .28); }
+.pile.found::after { content: attr(data-suit); position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(16px, 4.5cqw, 36px); color: rgb(226 181 82 / .25); }
+.pile.found:has(.pcard)::after { display: none; }
+.pile.stock { cursor: pointer; display: grid; place-items: center; }
+.pile.stock .recycle { font-size: clamp(18px, 4cqw, 32px); color: rgb(226 181 82 / .55); }
+.pile.tab { aspect-ratio: auto; min-height: calc(var(--cw, 80px) * 1.4); }
+.pile.tab:empty { border: 1.5px dashed rgb(255 255 255 / .1); }
+.pcard {
+  position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 5 / 7; border-radius: clamp(4px, .9cqw, 8px);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .06) inset, 0 3px 10px -3px rgb(0 0 0 / .7);
+  font-family: Inter, "Segoe UI", sans-serif; line-height: 1;
+}
+.pcard.down {
+  background:
+    radial-gradient(circle at 50% 50%, rgb(226 181 82 / .25) 0 16%, transparent 17%),
+    repeating-linear-gradient(45deg, rgb(226 181 82 / .09) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg, #1c2b51, #0f1830);
+  border: 1px solid rgb(226 181 82 / .55);
+}
+.pcard.down .count { position: absolute; right: 6%; bottom: 5%; font-family: var(--mono); font-size: clamp(9px, 1.8cqw, 13px); color: var(--marker); }
+.pcard.up { background: linear-gradient(180deg, #fbf8f1, #efe9db); color: #1b2238; border: 1px solid #d8cfba; cursor: grab; }
+.pcard.up.red { color: #c2362b; }
+.pcard .ci { position: absolute; left: 8%; top: 6%; display: grid; justify-items: center; font-weight: 800; font-size: clamp(10px, 2.5cqw, 21px); letter-spacing: -.04em; }
+.pcard .ci i { font-style: normal; font-size: .85em; margin-top: 1px; }
+.pcard .ci.br { left: auto; top: auto; right: 8%; bottom: 6%; transform: rotate(180deg); }
+.pcard .cs { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(18px, 5.2cqw, 46px); }
+.pcard.under .ci.br, .pcard.under .cs { visibility: hidden; }
+.pcard.nope { animation: nope .35s; }
+@keyframes nope { 25% { translate: -4px 0; } 75% { translate: 4px 0; } }
+.sol-drag { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.sol-drag .pcard { box-shadow: 0 18px 30px -10px rgb(0 0 0 / .8); cursor: grabbing; }
+.sol.won .pile.found .pcard { animation: glowcard 1.2s ease-in-out 2; }
+@keyframes glowcard { 50% { box-shadow: 0 0 24px 4px rgb(226 181 82 / .8); } }
+@media (max-width: 520px) { .pcard .ci.br { display: none; } }
+
+/* ================= Schiffe versenken ================= */
+.bs { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+@media (max-width: 760px) { .bs { grid-template-columns: minmax(0, 1fr); } .bs.battle #bs-foe { order: -1; } }
+.bs-side h3 { margin: 0 0 10px; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--display); font-size: 18px; }
+.bs-side h3 small { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.bs-grid {
+  display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 2px; padding: 6px; border-radius: 12px;
+  background: linear-gradient(160deg, #0b2141, #081530); border: 1px solid rgb(56 189 248 / .25);
+}
+.bs-cell { aspect-ratio: 1; border: 0; padding: 0; border-radius: 3px; background: rgb(56 189 248 / .07); position: relative; }
+.bs-grid.foe .bs-cell:not(:disabled):hover { background: rgb(226 181 82 / .35); cursor: crosshair; }
+.bs-grid.foe .bs-cell:disabled { cursor: default; }
+.bs-cell.ship { background: #6b7a99; box-shadow: inset 0 -2px 0 rgb(0 0 0 / .3); }
+.bs-cell.pv { background: rgb(226 181 82 / .55); }
+.bs-cell.pv.bad { background: rgb(255 107 94 / .5); }
+.bs-cell.miss::after { content: ""; position: absolute; inset: 38%; border-radius: 50%; background: rgb(160 200 255 / .55); }
+.bs-cell.hit { background: #7a2a2a; }
+.bs-cell.hit::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: #ffd2c8; font-weight: 800; font-size: clamp(9px, 2.2vw, 15px); }
+.bs-cell.sunk { background: var(--red); }
+.bs-cell.ghost { background: transparent; box-shadow: inset 0 0 0 2px var(--red); }
+.bs.battle .bs-grid.own { opacity: .92; }
+.bs-dock { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; }
+.bs-ship { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.bs-ship b { font-weight: 600; }
+.bs-ship i { display: inline-block; width: calc(var(--l) * 12px); height: 8px; border-radius: 4px; background: #6b7a99; }
+.bs-ship.now { color: var(--marker); }
+.bs-ship.now i { background: var(--marker); }
+.bs-ship.done { text-decoration: line-through; opacity: .5; }
+
+/* ================= Minigolf ================= */
+.golf-card { width: min(100%, 560px); overflow-x: auto; }
+.golf-card table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.golf-card th, .golf-card td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.golf-card th { color: var(--muted); font-weight: 600; }
+.golf-card td:first-child, .golf-card th:first-child { text-align: left; color: var(--muted); }
+.golf-card .cur { color: var(--marker); background: rgb(226 181 82 / .08); }
+.golf-card .under { color: var(--good); }
+.golf-card .over { color: var(--red); }
+
+/* ================= Kometenrennen ================= */
+.race-setup { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }

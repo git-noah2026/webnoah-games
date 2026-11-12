@@ -13,6 +13,10 @@ Ein Projekt der WebNoah Services GmbH, aus der WebNoah+ Familie.
 | Minenfeld | `docs/spiele/minen/` | Logik |
 | Ziegelbrecher | `docs/spiele/ziegel/` | Action, Geschicklichkeit |
 | Reaktionstest | `docs/spiele/reaktion/` | Kurze Spiele |
+| Minigolf | `docs/spiele/minigolf/` | Geschicklichkeit |
+| Kometenrennen | `docs/spiele/rennen/` | Karten & Brett, Zu zweit |
+| Solitär | `docs/spiele/solitaer/` | Karten & Brett |
+| Schiffe versenken | `docs/spiele/schiffe/` | Strategie |
 | Krieg der Adligen | extern auf games.webnoah.andrerer.org | Strategie |
 | Sudoku Solver | extern auf games.webnoah.andrerer.org | Logik |
 

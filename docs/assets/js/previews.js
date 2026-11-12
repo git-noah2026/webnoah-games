@@ -163,5 +163,117 @@
     }
   };
 
+
+  /* ---------- Vorschauen der neuen Spiele ---------- */
+  const SUITS = ["♠", "♥", "♦", "♣"];
+  function miniCard(x, cx, cy, cw, up, s, label, p) {
+    const ch = cw * 1.4;
+    if (!up) {
+      x.fillStyle = "#13203d"; rr(x, cx, cy, cw, ch, 4); x.fill();
+      x.strokeStyle = p.marker; x.globalAlpha = .7; x.lineWidth = 1; rr(x, cx + 3, cy + 3, cw - 6, ch - 6, 3); x.stroke(); x.globalAlpha = 1;
+      return;
+    }
+    x.fillStyle = "#f4f0e6"; rr(x, cx, cy, cw, ch, 4); x.fill();
+    x.fillStyle = s === 1 || s === 2 ? "#c2362b" : "#1b2238";
+    x.font = `700 ${Math.round(cw * .34)}px Inter, sans-serif`; x.textAlign = "left"; x.textBaseline = "top";
+    x.fillText(label + SUITS[s], cx + cw * .1, cy + cw * .08);
+  }
+  Object.assign(PREVIEW, {
+    solitaer(x, w, hh, t, p) {
+      karo(x, w, hh, 14, p);
+      const cw = Math.min(w / 9.2, hh / 6), gap = (w - cw * 7) / 8, top = hh * .14 + cw * 1.4 + 10;
+      // Ablage oben
+      for (let f = 0; f < 4; f++) {
+        const fx = gap + (f + 3) * (cw + gap), fy = hh * .1;
+        x.strokeStyle = "rgba(226,181,82,.45)"; x.lineWidth = 1; rr(x, fx, fy, cw, cw * 1.4, 4); x.stroke();
+        if (f < 2) miniCard(x, fx, fy, cw, true, f === 0 ? 1 : 3, "A", p);
+      }
+      miniCard(x, gap, hh * .1, cw, false, 0, "", p);
+      // Spalten
+      const labels = ["K", "D", "B", "10", "9", "8", "7"];
+      for (let c = 0; c < 7; c++) {
+        let y = top;
+        for (let k = 0; k < c; k++) { miniCard(x, gap + c * (cw + gap), y, cw, false, 0, "", p); y += cw * .18; }
+        for (let k = 0; k < Math.min(3, 7 - c); k++) { miniCard(x, gap + c * (cw + gap), y, cw, true, (c + k) % 4, labels[(c + k) % 7], p); y += cw * .38; }
+      }
+      // Karte fliegt zur Ablage
+      const ph = (t * .5) % 1, e = ph < .6 ? ph / .6 : 1;
+      const sx = gap + 6 * (cw + gap), sy = top + cw * 1.2, tx = gap + 5 * (cw + gap), ty = hh * .1;
+      const fx = sx + (tx - sx) * e, fy = sy + (ty - sy) * e - Math.sin(e * Math.PI) * hh * .12;
+      x.save(); x.shadowColor = "rgba(0,0,0,.5)"; x.shadowBlur = 10; miniCard(x, fx, fy, cw, true, 2, "2", p); x.restore();
+    },
+    schiffe(x, w, hh, t, p) {
+      x.fillStyle = "#0b1a33"; x.fillRect(0, 0, w, hh);
+      const n = 10, s = Math.min((w - 30) / n, (hh - 24) / n), ox = (w - s * n) / 2, oy = (hh - s * n) / 2;
+      x.strokeStyle = "rgba(56,189,248,.18)"; x.lineWidth = 1;
+      for (let i = 0; i <= n; i++) { x.beginPath(); x.moveTo(ox + i * s, oy); x.lineTo(ox + i * s, oy + n * s); x.moveTo(ox, oy + i * s); x.lineTo(ox + n * s, oy + i * s); x.stroke(); }
+      const ships = [[1, 1, 5, 0], [7, 3, 4, 1], [2, 5, 3, 0], [5, 8, 3, 0], [0, 7, 2, 1]];
+      const shipAt = new Map();
+      ships.forEach(([sx, sy, l, v], k) => { for (let i = 0; i < l; i++) shipAt.set((sy + (v ? i : 0)) * n + sx + (v ? 0 : i), k); });
+      // Schussreihenfolge, fest gemischt
+      const order = Array.from({ length: n * n }, (_, i) => i).sort((a, b) => ((a * 37) % 101) - ((b * 37) % 101));
+      const k = Math.floor((t * 4) % 70);
+      for (let i = 0; i < k; i++) {
+        const c = order[i], cx = ox + (c % n) * s + s / 2, cy = oy + Math.floor(c / n) * s + s / 2;
+        if (shipAt.has(c)) {
+          x.fillStyle = p.red; x.globalAlpha = .9; x.beginPath(); x.arc(cx, cy, s * .34, 0, 6.283); x.fill(); x.globalAlpha = 1;
+          x.strokeStyle = "#fff"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(cx - s * .16, cy - s * .16); x.lineTo(cx + s * .16, cy + s * .16); x.moveTo(cx + s * .16, cy - s * .16); x.lineTo(cx - s * .16, cy + s * .16); x.stroke();
+        } else { x.fillStyle = "rgba(160,200,255,.45)"; x.beginPath(); x.arc(cx, cy, s * .1, 0, 6.283); x.fill(); }
+      }
+      // Fadenkreuz auf dem nächsten Ziel
+      const nc = order[k], ax = ox + (nc % n) * s + s / 2, ay = oy + Math.floor(nc / n) * s + s / 2, pulse = 1 + Math.sin(t * 8) * .1;
+      x.strokeStyle = p.marker; x.lineWidth = 1.5; x.beginPath(); x.arc(ax, ay, s * .45 * pulse, 0, 6.283); x.stroke();
+      x.beginPath(); x.moveTo(ax - s * .7, ay); x.lineTo(ax + s * .7, ay); x.moveTo(ax, ay - s * .7); x.lineTo(ax, ay + s * .7); x.stroke();
+    },
+    minigolf(x, w, hh, t, p) {
+      x.fillStyle = p.paper; x.fillRect(0, 0, w, hh);
+      const m = 16, g = x.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, "#0f4a43"); g.addColorStop(1, "#0b3833");
+      x.fillStyle = g; rr(x, m, m, w - 2 * m, hh - 2 * m, 10); x.fill();
+      x.strokeStyle = p.marker; x.lineWidth = 3; x.stroke();
+      // Teich
+      x.fillStyle = "#11618a"; rr(x, w * .38, hh * .42, w * .26, hh * .3, 8); x.fill();
+      const cup = [w * .8, hh * .3], tee = [w * .16, hh * .72];
+      x.fillStyle = "#020409"; x.beginPath(); x.arc(cup[0], cup[1], 7, 0, 6.283); x.fill();
+      x.strokeStyle = p.fg; x.lineWidth = 1.5; x.beginPath(); x.moveTo(cup[0], cup[1]); x.lineTo(cup[0], cup[1] - 30); x.stroke();
+      x.fillStyle = p.c[1]; x.beginPath(); x.moveTo(cup[0], cup[1] - 30); x.lineTo(cup[0] + 16, cup[1] - 25); x.lineTo(cup[0], cup[1] - 20); x.fill();
+      // Ball rollt über einen Bogen ins Loch
+      const ph = (t * .35) % 1;
+      const ctrl = [w * .4, hh * .05];
+      if (ph < .25) {
+        const a = -0.9, len = 20 + (ph / .25) * 50;
+        x.strokeStyle = p.marker; x.setLineDash([2, 6]); x.lineWidth = 2;
+        x.beginPath(); x.moveTo(tee[0], tee[1]); x.lineTo(tee[0] + Math.cos(a) * len, tee[1] + Math.sin(a) * len); x.stroke(); x.setLineDash([]);
+      }
+      const e = ph < .25 ? 0 : Math.min(1, (ph - .25) / .6), ee = 1 - Math.pow(1 - e, 2.2);
+      const bx = (1 - ee) * (1 - ee) * tee[0] + 2 * (1 - ee) * ee * ctrl[0] + ee * ee * cup[0];
+      const by = (1 - ee) * (1 - ee) * tee[1] + 2 * (1 - ee) * ee * ctrl[1] + ee * ee * cup[1];
+      if (e < 1) { x.fillStyle = "#f5f7fb"; x.beginPath(); x.arc(bx, by, 5, 0, 6.283); x.fill(); }
+    },
+    rennen(x, w, hh, t, p) {
+      x.fillStyle = "#0b1224"; x.fillRect(0, 0, w, hh);
+      const s = Math.min(w, hh) * .78, ox = (w - s) / 2, oy = (hh - s) / 2, step = s / 10;
+      const pos = i => { const side = Math.floor(i / 10) % 4, k = i % 10; return side === 0 ? [ox + k * step, oy] : side === 1 ? [ox + s, oy + k * step] : side === 2 ? [ox + s - k * step, oy + s] : [ox, oy + s - k * step]; };
+      for (let i = 0; i < 40; i++) {
+        const [fx, fy] = pos(i);
+        x.fillStyle = i % 10 === 0 ? [p.c[0], p.c[1], p.c[2], p.c[4]][i / 10] : "#1b2846";
+        x.globalAlpha = i % 10 === 0 ? .5 : 1; x.beginPath(); x.arc(fx, fy, step * .3, 0, 6.283); x.fill(); x.globalAlpha = 1;
+        if ([5, 15, 25, 35].includes(i)) { x.fillStyle = p.marker; x.font = `${Math.round(step * .45)}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("★", fx, fy + 1); }
+      }
+      [0, 1, 2, 3].forEach(pl => {
+        const prog = (pl * 10 + Math.floor(t * (1.2 + pl * .35)) * 3) % 40;
+        const [tx, ty] = pos(prog), hop = Math.abs(Math.sin(t * 3 + pl)) * 4;
+        x.fillStyle = [p.c[0], p.c[1], p.c[2], p.c[4]][pl]; x.beginPath(); x.arc(tx, ty - hop, step * .26, 0, 6.283); x.fill();
+        x.strokeStyle = "rgba(255,255,255,.7)"; x.lineWidth = 1.2; x.stroke();
+      });
+      // Würfel
+      const ds = s * .26, n = 1 + Math.floor(t * 1.5) % 6, cx = w / 2, cy = hh / 2;
+      x.save(); x.translate(cx, cy); x.rotate(Math.sin(t * 1.5) * .15);
+      x.fillStyle = "#f4f1e8"; rr(x, -ds / 2, -ds / 2, ds, ds, ds * .18); x.fill();
+      const d = ds * .26, pips = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] }[n];
+      x.fillStyle = "#121833"; for (const [a, b] of pips) { x.beginPath(); x.arc(a * d, b * d, ds * .07, 0, 6.283); x.fill(); }
+      x.restore();
+    }
+  });
+
   WNG.PREVIEW = PREVIEW;
 })();

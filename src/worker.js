@@ -13,7 +13,11 @@ const GAMES = {
   vier: { better: "high", variants: [""], min: 0, max: 100000 },
   minen: { better: "low", variants: ["klein", "mittel"], min: 1, max: 99999 },
   ziegel: { better: "high", variants: [""], min: 0, max: 10000000 },
-  reaktion: { better: "low", variants: [""], min: 80, max: 5000 }
+  reaktion: { better: "low", variants: [""], min: 80, max: 5000 },
+  solitaer: { better: "low", variants: [""], min: 20, max: 36000 },
+  schiffe: { better: "low", variants: [""], min: 17, max: 100 },
+  minigolf: { better: "low", variants: [""], min: 6, max: 54 },
+  rennen: { better: "high", variants: [""], min: 0, max: 100000 }
 };
 const COLORS = ["#38bdf8", "#ff6b5e", "#4ade80", "#e2b552", "#a78bfa", "#2fb3a6", "#f472b6", "#94a3b8"];
 const COOKIE = "wng_session";

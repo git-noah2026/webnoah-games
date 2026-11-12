@@ -123,7 +123,7 @@
   showSpot(0); restartSpot();
 
   /* ---------- Bibliothek ---------- */
-  const CATS = ["Alle", "Kurze Spiele", "Denkspiele", "Action", "Logik", "Strategie", "Geschicklichkeit", "Zu zweit"];
+  const CATS = ["Alle", "Kurze Spiele", "Denkspiele", "Action", "Logik", "Strategie", "Karten & Brett", "Geschicklichkeit", "Zu zweit"];
   const ICON = {
     "Alle": '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
     "Kurze Spiele": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
@@ -132,6 +132,7 @@
     "Logik": '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
     "Strategie": '<path d="M8 21h8M9 17h6l-1-6h2l-1-4h-1V4h-2v2h-2V4H8v3H7l-1 4h2z"/>',
     "Geschicklichkeit": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+    "Karten & Brett": '<rect x="3" y="5" width="11" height="15" rx="2"/><path d="M14 7.5l4.2-1.3a1.5 1.5 0 0 1 1.9 1l3 9.8a1.5 1.5 0 0 1-1 1.9L14 21"/><path d="M8.5 10.5c-1.2 1.4-2 2.3-2 3.2a1.4 1.4 0 0 0 2.6.7l-.6 1.6h1l-.6-1.6a1.4 1.4 0 0 0 2.6-.7c0-.9-.8-1.8-2-3.2z"/>',
     "Zu zweit": '<circle cx="8" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.8"/><path d="M2 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5M14.5 14.6c.8-.4 1.6-.6 2.5-.6 2.4 0 4.3 1.6 5 4.5"/>'
   };
   const state = { tab: "all", cat: "Alle", q: "" };
