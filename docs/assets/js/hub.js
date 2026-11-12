@@ -162,11 +162,13 @@
     tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === state.tab)));
     $("#fav-count").textContent = f.length;
     catsEl.querySelectorAll(".cat").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.cat === state.cat)));
-    const list = GAMES.filter(g =>
+    const off = (WNG.auth && WNG.auth.settings && WNG.auth.settings.disabled) || [];
+    const visible = GAMES.filter(g => !off.includes(g.id));
+    const list = visible.filter(g =>
       (state.tab === "all" || f.includes(g.id)) &&
       (state.cat === "Alle" || g.cats.includes(state.cat)) &&
       (!state.q || (g.name + " " + g.desc + " " + g.cats.join(" ")).toLowerCase().includes(state.q)));
-    $("#hits").textContent = `${list.length} von ${GAMES.length} Spielen`;
+    $("#hits").textContent = `${list.length} von ${visible.length} Spielen`;
     WNG.thumbs.detachAll(grid);
     grid.innerHTML = "";
     list.forEach(g => {
@@ -185,6 +187,8 @@
   render();
   // Nach dem Anmelden kommen Rekorde und Favoriten vom Server
   document.addEventListener("wng:sync", render);
+  // Vom Admin pausierte Spiele ausblenden
+  document.addEventListener("wng:settings", render);
 
   /* ---------- Ruhmeshalle ---------- */
   const CROWN = '<svg viewBox="0 0 24 15" aria-hidden="true"><path fill="currentColor" d="M1 4l5 4 6-7 6 7 5-4-2 11H3z"/></svg>';

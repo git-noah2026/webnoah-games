@@ -18,5 +18,7 @@
       "database_name": "webnoah-games"
     }
   ],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // ADMIN_USERS (kommagetrennte Benutzernamen der Haupt-Admins) wird im Cloudflare-Dashboard gesetzt und bleibt beim Deploy erhalten.
+  "keep_vars": true
 }

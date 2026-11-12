@@ -104,6 +104,20 @@
   mount($("#stage"), ui);
 
   document.addEventListener("wng:sync", () => { ui.showBest(); paintFav(); });
+
+  // Vom Admin pausiert: Spieler sehen einen Hinweis, Admins dürfen weiter testen
+  document.addEventListener("wng:settings", e => {
+    const old = document.querySelector(".paused-note"); if (old) old.remove();
+    const paused = (e.detail.disabled || []).includes(id);
+    const sheet = document.querySelector(".sheet");
+    if (!paused) { sheet.classList.remove("paused"); return; }
+    const admin = WNG.auth.user && WNG.auth.user.role === "admin";
+    const note = h("div", "paused-note", admin
+      ? `<b>Pausiert.</b> Dieses Spiel ist für Spieler gerade ausgeblendet. Du siehst es, weil du Admin bist.`
+      : `<b>Dieses Spiel macht gerade Pause.</b> Es kommt bald wieder. <a href="${root}#spiele">Zu den anderen Spielen →</a>`);
+    sheet.before(note);
+    if (!admin) { sheet.classList.add("paused"); keyDown = keyUp = null; }
+  });
   document.addEventListener("wng:auth", loadBoard);
 
   // Weitere Spiele: zuerst solche mit gemeinsamer Kategorie

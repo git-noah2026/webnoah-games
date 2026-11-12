@@ -168,6 +168,7 @@
           <div class="account-head">${avatar(u, "lg")}<div><b>${esc(u.display)}</b><span>@${esc(u.username)}</span></div></div>
           <a href="${root}profil/">Mein Profil</a>
           <a href="${root}bestenliste/">Bestenliste</a>
+          ${u.role === "admin" ? `<a href="${root}admin/" class="admin-link">Admin-Portal</a>` : ""}
           <button type="button" data-logout>Abmelden</button>
         </div>
       </div>`;
@@ -183,6 +184,25 @@
     slot.querySelector("[data-logout]").onclick = async () => { await logout(); toast("Abgemeldet. Deine Rekorde bleiben auch auf diesem Gerät."); };
   }
 
+  /* ---------- Ankündigung und pausierte Spiele (vom Admin-Portal) ---------- */
+  auth.settings = { announcement: null, disabled: [] };
+  function banner() {
+    const old = document.querySelector(".announce:not(.static)"); if (old) old.remove();
+    const a = auth.settings.announcement;
+    if (!a || !a.text || store.get("wng:ann:" + a.id)) return;
+    const el = h("div", `announce lvl-${a.level}`);
+    el.setAttribute("role", "status");
+    el.innerHTML = `<div class="announce-in"><span class="announce-ico" aria-hidden="true"></span><p>${esc(a.text)}</p><button type="button" aria-label="Ankündigung ausblenden">×</button></div>`;
+    el.querySelector("button").onclick = () => { store.set("wng:ann:" + a.id, 1); el.remove(); };
+    const bar = document.querySelector(".bar");
+    if (bar) bar.after(el); else document.body.prepend(el);
+  }
+  async function loadSettings() {
+    try { auth.settings = await api("settings", { timeout: 5000 }); } catch { return; }
+    banner();
+    document.dispatchEvent(new CustomEvent("wng:settings", { detail: auth.settings }));
+  }
+
   async function init() {
     paint();
     try {
@@ -192,6 +212,7 @@
       if (auth.user) { try { apply(await api("sync")); } catch { /* offline: lokale Daten nutzen */ } }
     } catch { auth.available = false; auth.user = null; }
     paint(); emit(); readyResolve(auth);
+    if (auth.available) loadSettings();
   }
 
   WNG.auth = auth;

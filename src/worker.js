@@ -57,12 +57,30 @@ const SCHEMA = [
      game TEXT NOT NULL, plays INTEGER NOT NULL DEFAULT 0, last INTEGER NOT NULL,
      PRIMARY KEY (user_id, game))`,
   `CREATE TABLE IF NOT EXISTS limits (
-     key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset INTEGER NOT NULL)`
+     key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS admin_log (
+     id INTEGER PRIMARY KEY AUTOINCREMENT, admin TEXT NOT NULL, action TEXT NOT NULL,
+     target TEXT, detail TEXT, at INTEGER NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS admin_log_at ON admin_log (at)`
+];
+// Spalten, die nach dem ersten Start dazugekommen sind. "duplicate column" heißt: schon da.
+const MIGRATIONS = [
+  "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'",
+  "ALTER TABLE users ADD COLUMN banned INTEGER NOT NULL DEFAULT 0",
+  "ALTER TABLE users ADD COLUMN ban_reason TEXT",
+  "ALTER TABLE users ADD COLUMN last_seen INTEGER"
 ];
 
 let schemaReady = null;
 function ensureSchema(db) {
-  if (!schemaReady) schemaReady = db.batch(SCHEMA.map(s => db.prepare(s))).catch(e => { schemaReady = null; throw e; });
+  if (!schemaReady) schemaReady = (async () => {
+    await db.batch(SCHEMA.map(s => db.prepare(s)));
+    for (const m of MIGRATIONS) {
+      try { await db.prepare(m).run(); }
+      catch (e) { if (!/duplicate column/i.test(String(e && e.message))) throw e; }
+    }
+  })().catch(e => { schemaReady = null; throw e; });
   return schemaReady;
 }
 
@@ -138,11 +156,38 @@ async function currentUser(req, db) {
   const token = readCookie(req, COOKIE);
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
   const row = await db.prepare(
-    `SELECT u.id, u.username, u.display, u.color, u.created FROM sessions s JOIN users u ON u.id = s.user_id
+    `SELECT u.id, u.username, u.display, u.color, u.created, u.role, u.banned, u.last_seen FROM sessions s JOIN users u ON u.id = s.user_id
      WHERE s.token_hash = ? AND s.expires > ?`).bind(await sha256(token), now()).first();
-  return row || null;
+  if (!row || row.banned) return null;
+  // "Zuletzt aktiv" höchstens alle 10 Minuten schreiben
+  if (!row.last_seen || now() - row.last_seen > 600000) await db.prepare("UPDATE users SET last_seen = ? WHERE id = ?").bind(now(), row.id).run();
+  return row;
 }
 async function requireUser(req, db) { const u = await currentUser(req, db); if (!u) fail(401, "Bitte zuerst anmelden."); return u; }
+
+// Haupt-Admins stehen in der Cloudflare-Variable ADMIN_USERS (kommagetrennt) und lassen sich nicht aussperren.
+const envAdmins = env => String(env.ADMIN_USERS || "").split(/[,\s]+/).filter(Boolean).map(s => s.toLowerCase());
+const isEnvAdmin = (u, env) => !!u && envAdmins(env).includes(String(u.username).toLowerCase());
+const isAdmin = (u, env) => !!u && (u.role === "admin" || isEnvAdmin(u, env));
+async function requireAdmin(req, env) {
+  const u = await requireUser(req, env.DB);
+  if (!isAdmin(u, env)) fail(403, "Dieser Bereich ist nur für Admins.");
+  return u;
+}
+async function audit(db, admin, action, target, detail) {
+  await db.prepare("INSERT INTO admin_log (admin, action, target, detail, at) VALUES (?, ?, ?, ?, ?)")
+    .bind(admin.username, action, target || null, detail ? String(detail).slice(0, 500) : null, now()).run();
+}
+async function readSettings(db) {
+  const rows = (await db.prepare("SELECT key, value FROM settings").all()).results;
+  const s = Object.fromEntries(rows.map(r => { try { return [r.key, JSON.parse(r.value)]; } catch { return [r.key, null]; } }));
+  return { announcement: s.announcement || null, disabled: Array.isArray(s.disabled) ? s.disabled : [] };
+}
+function tempPassword() {
+  const abc = "abcdefghjkmnpqrstuvwxyz23456789", bytes = crypto.getRandomValues(new Uint8Array(12));
+  const s = [...bytes].map(b => abc[b % abc.length]).join("");
+  return `${s.slice(0, 4)}-${s.slice(4, 8)}-${s.slice(8, 12)}`;
+}
 
 async function startSession(req, db, userId) {
   const token = hex(crypto.getRandomValues(new Uint8Array(32)));
@@ -202,8 +247,12 @@ async function route(req, env) {
 
   if (path === "/api/me" && m === "GET") {
     const u = await currentUser(req, db);
-    return json({ user: u ? publicUser(u) : null });
+    return json({ user: u ? { ...publicUser(u), role: isAdmin(u, env) ? "admin" : "user" } : null });
   }
+
+  if (path === "/api/settings" && m === "GET") return json(await readSettings(db));
+
+  if (path.startsWith("/api/admin/")) return adminRoute(req, env, url, path, m);
 
   if (path === "/api/register" && m === "POST") {
     const { username = "", password = "" } = await body(req);
@@ -232,6 +281,7 @@ async function route(req, env) {
     // Auch ohne Konto rechnen, damit die Antwortzeit nichts verrät.
     const { hash } = await hashPassword(password, u ? u.pw_salt : "AAAAAAAAAAAAAAAAAAAAAA==");
     if (!u || !safeEqual(hash, u.pw_hash)) fail(401, "Benutzername oder Passwort stimmt nicht.");
+    if (u.banned) fail(403, `Dieses Konto ist gesperrt${u.ban_reason ? `: ${u.ban_reason}` : "."}`);
     const cookie = await startSession(req, db, u.id);
     return json({ user: publicUser(u) }, 200, { "set-cookie": cookie });
   }
@@ -335,14 +385,15 @@ async function route(req, env) {
     const order = g.better === "low" ? "ASC" : "DESC";
     const rows = await db.prepare(
       `SELECT u.username, u.display, u.color, r.value, r.updated FROM records r JOIN users u ON u.id = r.user_id
-       WHERE r.game = ? AND r.variant = ? ORDER BY r.value ${order}, r.updated ASC LIMIT 10`).bind(game, variant).all();
+       WHERE r.game = ? AND r.variant = ? AND u.banned = 0 ORDER BY r.value ${order}, r.updated ASC LIMIT 10`).bind(game, variant).all();
     const me = await currentUser(req, db);
     let mine = null;
     if (me) {
       const own = await db.prepare("SELECT value FROM records WHERE user_id = ? AND game = ? AND variant = ?").bind(me.id, game, variant).first();
       if (own) {
         const cmp = g.better === "low" ? "<" : ">";
-        const ahead = await db.prepare(`SELECT COUNT(*) AS n FROM records WHERE game = ? AND variant = ? AND value ${cmp} ?`).bind(game, variant, own.value).first();
+        const ahead = await db.prepare(`SELECT COUNT(*) AS n FROM records r JOIN users u ON u.id = r.user_id
+          WHERE r.game = ? AND r.variant = ? AND u.banned = 0 AND r.value ${cmp} ?`).bind(game, variant, own.value).first();
         mine = { rank: ahead.n + 1, value: own.value };
       }
     }
@@ -351,7 +402,7 @@ async function route(req, env) {
 
   const userMatch = path.match(/^\/api\/users\/([A-Za-z0-9_.-]{3,20})$/);
   if (userMatch && m === "GET") {
-    const u = await db.prepare("SELECT id, username, display, color, created FROM users WHERE username = ?").bind(userMatch[1]).first();
+    const u = await db.prepare("SELECT id, username, display, color, created FROM users WHERE username = ? AND banned = 0").bind(userMatch[1]).first();
     if (!u) fail(404, "Dieses Profil gibt es nicht.");
     const [records, stats] = await db.batch([
       db.prepare("SELECT game, variant, value, updated FROM records WHERE user_id = ?").bind(u.id),
@@ -361,6 +412,228 @@ async function route(req, env) {
   }
 
   fail(404, "Diese Schnittstelle gibt es nicht.");
+}
+
+/* ---------- Admin ---------- */
+const DAY = 86400000;
+async function findUser(db, name) {
+  const u = await db.prepare("SELECT id, username, display, color, role, banned, ban_reason, created, last_seen FROM users WHERE username = ?").bind(name).first();
+  if (!u) fail(404, "Dieses Konto gibt es nicht.");
+  return u;
+}
+const adminView = (u, env) => ({
+  username: u.username, display: u.display, color: u.color, created: u.created, last_seen: u.last_seen,
+  role: isAdmin(u, env) ? "admin" : "user", owner: isEnvAdmin(u, env), banned: !!u.banned, ban_reason: u.ban_reason || null,
+  plays: u.plays ?? undefined, recs: u.recs ?? undefined
+});
+function guardTarget(me, target, env, what) {
+  if (target.id === me.id) fail(400, `Du kannst dich nicht selbst ${what}.`);
+  if (isEnvAdmin(target, env)) fail(400, `Haupt-Admins aus ADMIN_USERS lassen sich nicht ${what}.`);
+}
+const csvCell = v => { const s = v == null ? "" : String(v); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+
+async function adminRoute(req, env, url, path, m) {
+  const db = env.DB;
+  const me = await requireAdmin(req, env);
+  const q = url.searchParams;
+
+  // Übersicht
+  if (path === "/api/admin/stats" && m === "GET") {
+    const t = now(), from30 = Math.floor((t - 29 * DAY) / DAY) * DAY;
+    const r = await db.batch([
+      db.prepare("SELECT COUNT(*) AS n FROM users"),
+      db.prepare("SELECT COUNT(*) AS n FROM users WHERE created > ?").bind(t - 7 * DAY),
+      db.prepare("SELECT COUNT(*) AS n FROM users WHERE last_seen > ?").bind(t - DAY),
+      db.prepare("SELECT COUNT(*) AS n FROM users WHERE banned = 1"),
+      db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE expires > ?").bind(t),
+      db.prepare("SELECT COUNT(*) AS n FROM records"),
+      db.prepare("SELECT COALESCE(SUM(plays), 0) AS n FROM stats"),
+      db.prepare("SELECT game, SUM(plays) AS plays, COUNT(*) AS players FROM stats GROUP BY game ORDER BY plays DESC"),
+      db.prepare("SELECT created / 86400000 AS day, COUNT(*) AS n FROM users WHERE created >= ? GROUP BY day").bind(from30),
+      db.prepare(`SELECT u.username, u.display, u.color, SUM(s.plays) AS plays FROM stats s JOIN users u ON u.id = s.user_id
+                  GROUP BY u.id ORDER BY plays DESC LIMIT 6`),
+      db.prepare("SELECT username, display, color, created FROM users ORDER BY created DESC LIMIT 6")
+    ]);
+    const n = i => r[i].results[0].n;
+    return json({
+      users: n(0), new7: n(1), active24: n(2), banned: n(3), sessions: n(4), records: n(5), plays: n(6),
+      perGame: r[7].results, signups: r[8].results, from: from30, topPlayers: r[9].results, newest: r[10].results,
+      owners: envAdmins(env).length
+    });
+  }
+
+  // Nutzerliste
+  if (path === "/api/admin/users" && m === "GET") {
+    const term = `%${(q.get("q") || "").trim()}%`, page = Math.max(0, +q.get("page") || 0), per = 25;
+    const sorts = { created: "u.created", username: "u.username COLLATE NOCASE", last_seen: "COALESCE(u.last_seen, 0)", plays: "plays", recs: "recs" };
+    const sort = sorts[q.get("sort")] || sorts.created, dir = q.get("dir") === "asc" ? "ASC" : "DESC";
+    const owners = envAdmins(env), ownerIn = owners.length ? `OR LOWER(u.username) IN (${owners.map(() => "?").join(",")})` : "";
+    const filter = q.get("filter");
+    const where = ["(u.username LIKE ? OR u.display LIKE ?)"];
+    const args = [term, term];
+    if (filter === "admins") { where.push(`(u.role = 'admin' ${ownerIn})`); args.push(...owners); }
+    if (filter === "banned") where.push("u.banned = 1");
+    if (filter === "active") { where.push("u.last_seen > ?"); args.push(now() - 7 * DAY); }
+    const w = where.join(" AND ");
+    const [rows, total] = await db.batch([
+      db.prepare(`SELECT u.id, u.username, u.display, u.color, u.role, u.banned, u.ban_reason, u.created, u.last_seen,
+          (SELECT COALESCE(SUM(plays), 0) FROM stats WHERE user_id = u.id) AS plays,
+          (SELECT COUNT(*) FROM records WHERE user_id = u.id) AS recs
+        FROM users u WHERE ${w} ORDER BY ${sort} ${dir} LIMIT ${per} OFFSET ${page * per}`).bind(...args),
+      db.prepare(`SELECT COUNT(*) AS n FROM users u WHERE ${w}`).bind(...args)
+    ]);
+    return json({ users: rows.results.map(u => adminView(u, env)), total: total.results[0].n, page, per });
+  }
+
+  // CSV-Export aller Konten
+  if (path === "/api/admin/export.csv" && m === "GET") {
+    const rows = (await db.prepare(`SELECT u.username, u.display, u.role, u.banned, u.created, u.last_seen,
+        (SELECT COALESCE(SUM(plays), 0) FROM stats WHERE user_id = u.id) AS plays,
+        (SELECT COUNT(*) FROM records WHERE user_id = u.id) AS recs FROM users u ORDER BY u.created`).all()).results;
+    const iso = v => v ? new Date(v).toISOString() : "";
+    const lines = [["Benutzername", "Anzeigename", "Rolle", "Gesperrt", "Registriert", "Zuletzt aktiv", "Partien", "Rekorde"].join(";")]
+      .concat(rows.map(u => [u.username, u.display, isAdmin(u, env) ? "admin" : "user", u.banned ? "ja" : "nein", iso(u.created), iso(u.last_seen), u.plays, u.recs].map(csvCell).join(";")));
+    await audit(db, me, "export", null, `${rows.length} Konten`);
+    return new Response("﻿" + lines.join("\r\n"), { headers: {
+      "content-type": "text/csv; charset=utf-8", "cache-control": "no-store",
+      "content-disposition": `attachment; filename="webnoah-konten-${new Date().toISOString().slice(0, 10)}.csv"` } });
+  }
+
+  // Einzelnes Konto
+  const um = path.match(/^\/api\/admin\/users\/([A-Za-z0-9_.-]{3,20})(?:\/(password|logout|records))?$/);
+  if (um) {
+    const target = await findUser(db, um[1]), sub = um[2];
+
+    if (!sub && m === "GET") {
+      const [records, stats, sessions, log] = await db.batch([
+        db.prepare("SELECT game, variant, value, updated FROM records WHERE user_id = ? ORDER BY game").bind(target.id),
+        db.prepare("SELECT game, plays, last FROM stats WHERE user_id = ? ORDER BY plays DESC").bind(target.id),
+        db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE user_id = ? AND expires > ?").bind(target.id, now()),
+        db.prepare("SELECT admin, action, detail, at FROM admin_log WHERE target = ? COLLATE NOCASE ORDER BY at DESC LIMIT 20").bind(target.username)
+      ]);
+      return json({ user: adminView(target, env), self: target.id === me.id, records: records.results, stats: stats.results, sessions: sessions.results[0].n, log: log.results });
+    }
+
+    if (!sub && m === "PATCH") {
+      const b = await body(req), changes = [];
+      const upd = { display: target.display, color: target.color, role: target.role, banned: target.banned, ban_reason: target.ban_reason };
+      if (b.display !== undefined) {
+        const d = String(b.display).trim().replace(/\s+/g, " ");
+        if (d.length < 2 || d.length > 24) fail(400, "Der Anzeigename braucht 2 bis 24 Zeichen.");
+        if (d !== target.display) { upd.display = d; changes.push(`Anzeigename „${target.display}“ → „${d}“`); }
+      }
+      if (b.color !== undefined) {
+        if (!COLORS.includes(b.color)) fail(400, "Diese Farbe gibt es nicht.");
+        if (b.color !== target.color) { upd.color = b.color; changes.push("Farbe geändert"); }
+      }
+      if (b.role !== undefined) {
+        if (!["admin", "user"].includes(b.role)) fail(400, "Unbekannte Rolle.");
+        if (b.role !== target.role) { guardTarget(me, target, env, b.role === "admin" ? "befördern" : "zurückstufen"); upd.role = b.role; changes.push(b.role === "admin" ? "zum Admin ernannt" : "Admin-Rechte entzogen"); }
+      }
+      if (b.banned !== undefined) {
+        const ban = b.banned ? 1 : 0;
+        if (ban !== target.banned) {
+          guardTarget(me, target, env, ban ? "sperren" : "entsperren");
+          upd.banned = ban;
+          upd.ban_reason = ban ? (String(b.ban_reason || "").trim().slice(0, 140) || null) : null;
+          changes.push(ban ? `gesperrt${upd.ban_reason ? `: ${upd.ban_reason}` : ""}` : "entsperrt");
+        }
+      }
+      if (!changes.length) return json({ user: adminView(target, env) });
+      const ops = [db.prepare("UPDATE users SET display = ?, color = ?, role = ?, banned = ?, ban_reason = ? WHERE id = ?")
+        .bind(upd.display, upd.color, upd.role, upd.banned, upd.ban_reason, target.id)];
+      if (upd.banned && !target.banned) ops.push(db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id));
+      await db.batch(ops);
+      await audit(db, me, "update", target.username, changes.join(", "));
+      return json({ user: adminView({ ...target, ...upd }, env) });
+    }
+
+    if (!sub && m === "DELETE") {
+      guardTarget(me, target, env, "löschen");
+      await db.batch(["sessions", "records", "favs", "saves", "stats"].map(t => db.prepare(`DELETE FROM ${t} WHERE user_id = ?`).bind(target.id))
+        .concat(db.prepare("DELETE FROM users WHERE id = ?").bind(target.id)));
+      await audit(db, me, "delete", target.username, "Konto mit allen Daten gelöscht");
+      return json({ ok: true });
+    }
+
+    if (sub === "password" && m === "POST") {
+      if (target.id === me.id) fail(400, "Dein eigenes Passwort änderst du in deinem Profil.");
+      const pw = tempPassword(), { hash, salt } = await hashPassword(pw);
+      await db.batch([
+        db.prepare("UPDATE users SET pw_hash = ?, pw_salt = ? WHERE id = ?").bind(hash, salt, target.id),
+        db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id)
+      ]);
+      await audit(db, me, "password", target.username, "Temporäres Passwort erzeugt");
+      return json({ password: pw });
+    }
+
+    if (sub === "logout" && m === "POST") {
+      const r = await db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id).run();
+      await audit(db, me, "logout", target.username, `${r.meta.changes || 0} Sitzungen beendet`);
+      return json({ ended: r.meta.changes || 0 });
+    }
+
+    if (sub === "records" && m === "DELETE") {
+      const { game = "", variant = "" } = await body(req);
+      if (game === "*") {
+        const r = await db.prepare("DELETE FROM records WHERE user_id = ?").bind(target.id).run();
+        await audit(db, me, "records", target.username, `Alle Rekorde gelöscht (${r.meta.changes || 0})`);
+        return json({ deleted: r.meta.changes || 0 });
+      }
+      validGame(game, variant);
+      const r = await db.prepare("DELETE FROM records WHERE user_id = ? AND game = ? AND variant = ?").bind(target.id, game, variant).run();
+      await audit(db, me, "records", target.username, `Rekord ${game}${variant ? ` (${variant})` : ""} gelöscht`);
+      return json({ deleted: r.meta.changes || 0 });
+    }
+  }
+
+  // Bestenliste mit allen Einträgen (auch gesperrte Konten)
+  if (path === "/api/admin/leaderboard" && m === "GET") {
+    const game = q.get("game") || "", variant = q.get("variant") || "";
+    const g = validGame(game, variant);
+    const rows = await db.prepare(`SELECT u.username, u.display, u.color, u.banned, r.value, r.updated FROM records r JOIN users u ON u.id = r.user_id
+      WHERE r.game = ? AND r.variant = ? ORDER BY r.value ${g.better === "low" ? "ASC" : "DESC"}, r.updated ASC LIMIT 100`).bind(game, variant).all();
+    const total = await db.prepare("SELECT COUNT(*) AS n FROM records WHERE game = ? AND variant = ?").bind(game, variant).first();
+    return json({ game, variant, better: g.better, min: g.min, max: g.max, rows: rows.results, total: total.n });
+  }
+
+  // Einstellungen: Ankündigung und pausierte Spiele
+  if (path === "/api/admin/settings") {
+    if (m === "GET") return json(await readSettings(db));
+    if (m === "PUT") {
+      const b = await body(req), ops = [], changes = [];
+      if (b.announcement !== undefined) {
+        let a = null;
+        if (b.announcement && String(b.announcement.text || "").trim()) {
+          const text = String(b.announcement.text).trim().slice(0, 280);
+          const level = ["info", "warn", "success"].includes(b.announcement.level) ? b.announcement.level : "info";
+          a = { text, level, id: hex(crypto.getRandomValues(new Uint8Array(4))), at: now() };
+        }
+        ops.push(a ? db.prepare("INSERT INTO settings (key, value) VALUES ('announcement', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(JSON.stringify(a))
+          : db.prepare("DELETE FROM settings WHERE key = 'announcement'"));
+        changes.push(a ? `Ankündigung: ${a.text}` : "Ankündigung entfernt");
+      }
+      if (b.disabled !== undefined) {
+        const list = (Array.isArray(b.disabled) ? b.disabled : []).filter(s => typeof s === "string" && /^[a-z0-9-]{2,30}$/.test(s)).slice(0, 50);
+        ops.push(db.prepare("INSERT INTO settings (key, value) VALUES ('disabled', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(JSON.stringify(list)));
+        changes.push(list.length ? `Pausiert: ${list.join(", ")}` : "Alle Spiele aktiv");
+      }
+      if (ops.length) { await db.batch(ops); await audit(db, me, "settings", null, changes.join(" · ")); }
+      return json(await readSettings(db));
+    }
+  }
+
+  // Protokoll
+  if (path === "/api/admin/log" && m === "GET") {
+    const page = Math.max(0, +q.get("page") || 0), per = 40;
+    const [rows, total] = await db.batch([
+      db.prepare(`SELECT id, admin, action, target, detail, at FROM admin_log ORDER BY at DESC LIMIT ${per} OFFSET ${page * per}`),
+      db.prepare("SELECT COUNT(*) AS n FROM admin_log")
+    ]);
+    return json({ rows: rows.results, total: total.results[0].n, page, per });
+  }
+
+  fail(404, "Diese Admin-Schnittstelle gibt es nicht.");
 }
 
 export default {

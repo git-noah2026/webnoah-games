@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060b1a">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin-Portal · WebNoah-Games</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="admin-page">
+<div id="site-header"></div>
+
+<div class="adm locked" id="adm">
+  <aside class="adm-side">
+    <p class="kicker"><i></i>Admin-Portal</p>
+    <nav class="adm-nav" id="adm-nav" aria-label="Admin-Bereiche">
+      <a href="#uebersicht" data-v="uebersicht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM14 4v4h6V4zM4 20h6v-4H4z"/></svg>Übersicht</a>
+      <a href="#nutzer" data-v="nutzer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.7 3.3-5.8 6.5-5.8s5.8 2.1 6.5 5.8M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.6c1.7.8 2.7 2.6 3 5.4"/></svg>Nutzer</a>
+      <a href="#bestenlisten" data-v="bestenlisten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9.5 17h5"/></svg>Bestenlisten</a>
+      <a href="#inhalte" data-v="inhalte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l6 4V6L7 10zM16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/></svg>Inhalte</a>
+      <a href="#protokoll" data-v="protokoll"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>Protokoll</a>
+    </nav>
+    <div class="adm-me" id="adm-me"></div>
+  </aside>
+  <main class="adm-main" id="adm-main" tabindex="-1" aria-live="polite">
+    <p class="muted adm-loading">Lade …</p>
+  </main>
+</div>
+<dialog class="adm-dialog" id="adm-dialog"></dialog>
+
+<div id="site-footer"></div>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

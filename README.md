@@ -33,6 +33,20 @@ Ohne Konto speichert der Browser Rekorde und Favoriten in `localStorage`. Mit Ko
 
 Die Tabellen legt der Worker beim ersten Aufruf selbst an (`src/worker.js`, Konstante `SCHEMA`).
 
+## Admin-Portal
+
+Unter `/admin/` (nur auf Cloudflare, nicht auf GitHub Pages).
+
+- **Übersicht:** Konten, Aktive in 24 h, Partien, Rekorde, Sitzungen, Sperren, neue Konten der letzten 30 Tage, Partien pro Spiel, fleißigste Spieler, neueste Konten.
+- **Nutzer:** Suche, Filter (aktiv, Admins, gesperrt), Sortierung, CSV-Export. Pro Konto: Anzeigename ändern, zum Admin ernennen oder zurückstufen, sperren mit Grund, überall abmelden, temporäres Passwort erzeugen, einzelne oder alle Rekorde löschen, Konto löschen.
+- **Bestenlisten:** alle Einträge pro Spiel prüfen und löschen, gesperrte Konten sind markiert.
+- **Inhalte:** Ankündigungsleiste für alle Seiten (Info, Neuigkeit, Warnung) und Spiele pausieren.
+- **Protokoll:** jede Admin-Aktion mit Zeitpunkt, Admin, Konto und Details.
+
+**Haupt-Admin einrichten:** In Cloudflare unter *Workers & Pages → webnoah-games → Settings → Variables and Secrets* eine Variable `ADMIN_USERS` mit deinem Benutzernamen anlegen (mehrere mit Komma). Diese Konten sind immer Admin und können weder gesperrt noch gelöscht noch zurückgestuft werden. `keep_vars` in `wrangler.jsonc` sorgt dafür, dass die Variable beim Deploy erhalten bleibt. Weitere Admins ernennst du im Portal.
+
+Lokal: Datei `.dev.vars` mit `ADMIN_USERS=deinname` anlegen (steht in `.gitignore`).
+
 ## Lokal starten
 
 Die Seite besteht nur aus HTML, CSS und JavaScript im Ordner `docs/`. Ein einfacher Webserver reicht:
@@ -66,6 +80,7 @@ docs/assets/js/auth.js     Anmelden, Registrieren, Abgleich mit dem Server
 docs/assets/js/shell.js    Rahmen jeder Spielseite (Punkte, Rekord, Tasten, Bestenliste)
 docs/profil/               Profilseite
 docs/bestenliste/          Bestenlisten aller Spiele
+docs/admin/                Admin-Portal
 docs/spiele/<id>/          eine Seite pro Spiel: index.html + game.js
 ```
 
