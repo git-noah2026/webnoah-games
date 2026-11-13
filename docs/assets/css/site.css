@@ -951,3 +951,65 @@ textarea.input { width: 100%; resize: vertical; min-height: 80px; line-height: 1
 .rs-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
 .rs-log li:first-child { color: var(--fg); }
 .rs-log li::before { content: "› "; color: var(--marker); }
+
+/* ================= Vollbild-Spielseite ================= */
+.game-page {
+  --gp-chrome: 150px;
+  min-height: 100dvh; overflow-x: hidden;
+  background:
+    radial-gradient(900px 500px at 50% -10%, rgb(226 181 82 / .08), transparent 70%),
+    radial-gradient(rgb(238 241 247 / .05) 1px, transparent 1.4px) 0 0 / 26px 26px,
+    var(--paper);
+}
+.game-page:has(.tools:not(:empty)) { --gp-chrome: 200px; }
+.gp {
+  min-height: 100dvh; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: max(10px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+.gp-bar { width: 100%; max-width: 1400px; display: flex; align-items: center; gap: 8px; }
+.gp-icon {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line); background: rgb(14 22 41 / .8); color: var(--fg);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: border-color .15s, color .15s, transform .15s;
+}
+.gp-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.gp-icon:hover { border-color: var(--marker); color: var(--marker); }
+.gp-icon:active { transform: scale(.94); }
+.gp-home { border-color: rgb(226 181 82 / .6); color: var(--marker); }
+.gp-hud { margin-left: auto; display: flex; gap: 6px; }
+.gp-hud span { display: grid; justify-items: end; padding: 4px 12px; border-radius: 12px; background: rgb(14 22 41 / .7); border: 1px solid var(--line); min-width: 74px; }
+.gp-hud small { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.gp-hud b { font-family: var(--mono); font-size: 17px; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gp-hud .best b { color: var(--marker); }
+@media (max-width: 420px) { .gp-hud span { min-width: 0; padding: 4px 9px; } .gp-hud b { font-size: 15px; } }
+.game-page .tools { margin: 0; }
+.game-page .stage { flex: 1; width: 100%; max-width: 1400px; justify-content: center; }
+.game-page .status { margin: 0; min-height: 1.4em; font-size: 15px; color: var(--muted); font-weight: 500; }
+.game-page .board { border: 0; border-radius: 16px; box-shadow: 0 40px 90px -40px rgb(0 0 0 / .95), 0 0 0 1px rgb(226 181 82 / .25); }
+.game-page .paused-note { width: min(100%, 720px); }
+.game-page.paused .stage, .game-page.paused .tools { display: none; }
+
+/* Leiste mit Spielregeln, Favorit und Bestenliste */
+.gp-scrim { position: fixed; inset: 0; z-index: 40; background: rgb(2 5 14 / .55); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.drawer-open .gp-scrim { opacity: 1; pointer-events: auto; }
+.gp-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 41; width: min(420px, 100%); overflow-y: auto;
+  display: grid; gap: 18px; align-content: start;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 28px 22px;
+  background: var(--sheet-2); border-left: 1px solid rgb(226 181 82 / .35); box-shadow: -30px 0 60px -20px rgb(0 0 0 / .8);
+  animation: drawerin .22s ease-out;
+}
+.gp-drawer[hidden] { display: none; }
+@keyframes drawerin { from { transform: translateX(30px); opacity: 0; } }
+.gp-d-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.gp-d-head h2 { margin: 6px 0 0; font-size: 26px; line-height: 1.1; }
+.gp-drawer h3 { margin: 0 0 8px; font-size: 15px; font-family: var(--display); }
+.gp-d-help { margin: 0; color: var(--muted); line-height: 1.6; }
+.gp-drawer .fav-btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; }
+.gp-drawer .fav-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.gp-drawer .fav-btn[aria-pressed="true"] { background: var(--sheet); border-color: var(--marker); color: var(--marker); }
+.gp-drawer .fav-btn[aria-pressed="true"] svg { fill: currentColor; }
+.gp-drawer .lb-panel { margin: 0; max-width: none; padding: 16px; }
+.gp-drawer .lb-head h3 { margin: 0; }
+.gp-d-menu { justify-self: start; text-decoration: none; }

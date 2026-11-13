@@ -1,5 +1,6 @@
-// WebNoah-Games: Rahmen jeder Spielseite (Kopf, Punkte, Rekord, Tasten, Bestenliste, "Weitere Spiele").
-// Erwartet <body data-game="id"> und vorher geladenes spiele/<id>/game.js.
+// WebNoah-Games: Rahmen jeder Spielseite. Das Spiel füllt den Bildschirm, oben links geht es zurück ins Hauptmenü.
+// Punkte, Rekord, Neustart und eine ausklappbare Leiste mit Spielregeln, Favorit und Bestenliste.
+// Erwartet <body data-game="id"> und vorher geladenes spiele/<slug>/<slug>.js.
 (() => {
   "use strict";
   const { $, h, store, bestKey, favs, root, fmt } = WNG;
@@ -11,30 +12,39 @@
 
   let keyDown = null, keyUp = null, restartFn = null, variant = g.variant || "";
 
-  $("#p-eyebrow").textContent = `${g.cats.join(" · ")} · ≈ ${g.mins} Min`;
-  $("#p-name").textContent = g.name;
   $("#p-lbl").textContent = g.scoreLabel;
   $("#p-blbl").textContent = g.bestLabel || "Rekord";
-  $("#p-help").innerHTML = `<b>So geht’s</b>${g.help}`;
+
+  /* ---------- Ausklappbare Leiste: Spielregeln, Favorit, Bestenliste ---------- */
+  const drawer = $("#p-drawer"), infoBtn = $("#p-info");
+  drawer.querySelector(".gp-d-name").textContent = g.name;
+  drawer.querySelector(".gp-d-meta").textContent = `${g.cats.join(" · ")} · ${g.players} · ≈ ${g.mins} Min`;
+  drawer.querySelector(".gp-d-help").textContent = g.help;
+  const openDrawer = open => {
+    drawer.hidden = !open; drawer.setAttribute("aria-hidden", String(!open));
+    infoBtn.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("drawer-open", open);
+    if (open) { drawer.querySelector(".gp-d-close").focus(); loadBoard(); }
+  };
+  infoBtn.addEventListener("click", () => openDrawer(drawer.hidden));
+  drawer.querySelector(".gp-d-close").addEventListener("click", () => { openDrawer(false); infoBtn.focus(); });
+  $("#p-scrim").addEventListener("click", () => openDrawer(false));
 
   const fav = $("#p-fav");
-  const paintFav = () => { const on = favs.has(id); fav.setAttribute("aria-pressed", String(on)); fav.lastChild.textContent = on ? " Favorit" : " Merken"; };
+  const paintFav = () => { const on = favs.has(id); fav.setAttribute("aria-pressed", String(on)); fav.querySelector("span").textContent = on ? "In deinen Favoriten" : "Als Favorit merken"; };
   fav.addEventListener("click", () => { favs.toggle(id); paintFav(); });
   paintFav();
 
-  /* ---------- Bestenliste ---------- */
-  const board = h("section", "lb-panel");
-  board.setAttribute("aria-label", "Bestenliste");
-  board.hidden = true;
-  $("#p-help").after(board);
+  const board = $("#p-board");
   let lbSeq = 0;
   async function loadBoard() {
     const auth = WNG.auth;
     if (!auth || !auth.available) { board.hidden = true; return; }
+    if (drawer.hidden) return; // nur laden, wenn jemand hinschaut
     board.hidden = false;
     const seq = ++lbSeq;
     const label = g.variants && variant ? ` · ${WNG.variantName(g, variant)}` : "";
-    board.innerHTML = `<div class="lb-head"><h2 class="display">Bestenliste${label}</h2><a href="${root}bestenliste/?spiel=${id}">Alle Bestenlisten →</a></div><p class="lb-empty">Lade …</p>`;
+    board.innerHTML = `<div class="lb-head"><h3 class="display">Bestenliste${label}</h3><a href="${root}bestenliste/?spiel=${id}">Alle →</a></div><p class="lb-empty">Lade …</p>`;
     try {
       const data = await auth.api(`leaderboard?game=${id}&variant=${encodeURIComponent(variant)}`);
       if (seq !== lbSeq) return;
@@ -45,7 +55,7 @@
           <b class="lb-val">${fmt(g, r.value)}</b>
         </li>`).join("");
       let foot;
-      if (!auth.user) foot = `<p class="lb-cta"><button class="btn primary" type="button" data-login>Anmelden</button> und mit deinem Rekord in die Liste kommen.</p>`;
+      if (!auth.user) foot = `<p class="lb-cta"><button class="btn primary small-btn" type="button" data-login>Anmelden</button> und mit deinem Rekord in die Liste kommen.</p>`;
       else if (data.mine) foot = `<p class="lb-cta">Dein Platz: <b>#${data.mine.rank}</b> mit <mark>${fmt(g, data.mine.value)}</mark></p>`;
       else foot = `<p class="lb-cta">Spiel eine Runde, dann steht dein Rekord hier.</p>`;
       board.querySelector(".lb-empty").outerHTML = (rows ? `<ol class="lb-list">${rows}</ol>` : `<p class="lb-empty">Noch niemand eingetragen. Der erste Platz ist frei.</p>`) + foot;
@@ -68,7 +78,7 @@
       const changed = v !== undefined && v !== variant;
       if (v !== undefined) variant = v;
       const b = store.get(bestKey(id, variant));
-      $("#p-best").innerHTML = b == null ? "–" : `<mark>${fmt(g, b)}</mark>`;
+      $("#p-best").textContent = b == null ? "–" : fmt(g, b);
       if (changed) loadBoard();
     },
     submit(v, vr) {
@@ -94,7 +104,11 @@
 
   document.addEventListener("keydown", e => {
     if (e.target.closest && e.target.closest("input, select, textarea, dialog[open]")) return;
-    if (e.key === "Escape") { location.href = root; return; }
+    if (e.key === "Escape") {
+      if (!drawer.hidden) { openDrawer(false); infoBtn.focus(); return; }
+      location.href = root; return;
+    }
+    if (!drawer.hidden) return; // offene Leiste: Tasten nicht ans Spiel
     if (keyDown) keyDown(e);
   });
   document.addEventListener("keyup", e => { if (keyUp) keyUp(e); });
@@ -104,26 +118,19 @@
   mount($("#stage"), ui);
 
   document.addEventListener("wng:sync", () => { ui.showBest(); paintFav(); });
+  document.addEventListener("wng:auth", loadBoard);
 
   // Vom Admin pausiert: Spieler sehen einen Hinweis, Admins dürfen weiter testen
   document.addEventListener("wng:settings", e => {
     const old = document.querySelector(".paused-note"); if (old) old.remove();
     const paused = (e.detail.disabled || []).includes(id);
-    const sheet = document.querySelector(".sheet");
-    if (!paused) { sheet.classList.remove("paused"); return; }
+    const stage = $("#stage");
+    if (!paused) { document.body.classList.remove("paused"); return; }
     const admin = WNG.auth.user && WNG.auth.user.role === "admin";
     const note = h("div", "paused-note", admin
       ? `<b>Pausiert.</b> Dieses Spiel ist für Spieler gerade ausgeblendet. Du siehst es, weil du Admin bist.`
       : `<b>Dieses Spiel macht gerade Pause.</b> Es kommt bald wieder. <a href="${root}#spiele">Zu den anderen Spielen →</a>`);
-    sheet.before(note);
-    if (!admin) { sheet.classList.add("paused"); keyDown = keyUp = null; }
+    stage.before(note);
+    if (!admin) { document.body.classList.add("paused"); keyDown = keyUp = null; }
   });
-  document.addEventListener("wng:auth", loadBoard);
-
-  // Weitere Spiele: zuerst solche mit gemeinsamer Kategorie
-  const others = window.WNG_GAMES.filter(x => x.id !== id)
-    .map(x => ({ x, s: x.cats.filter(c => g.cats.includes(c)).length }))
-    .sort((a, b) => b.s - a.s).slice(0, 4).map(o => o.x);
-  const more = $("#more");
-  others.forEach(x => more.append(WNG.card(x)));
 })();

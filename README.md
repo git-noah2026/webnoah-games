@@ -8,22 +8,22 @@ Ein Projekt der WebNoah Services GmbH, aus der WebNoah+ Familie.
 | Spiel | Ordner | Kategorie |
 | --- | --- | --- |
 | Schlange | `docs/spiele/schlange/` | Action, Kurze Spiele |
-| Fächer-Memory | `docs/spiele/memory/` | Denkspiele |
-| Vier in einer Reihe | `docs/spiele/vier/` | Strategie, Zu zweit |
-| Minenfeld | `docs/spiele/minen/` | Logik |
-| Ziegelbrecher | `docs/spiele/ziegel/` | Action, Geschicklichkeit |
-| Reaktionstest | `docs/spiele/reaktion/` | Kurze Spiele |
+| Fächer-Memory | `docs/spiele/faecher-memory/` | Denkspiele |
+| Vier in einer Reihe | `docs/spiele/vier-in-einer-reihe/` | Strategie, Zu zweit |
+| Minenfeld | `docs/spiele/minenfeld/` | Logik |
+| Ziegelbrecher | `docs/spiele/ziegelbrecher/` | Action, Geschicklichkeit |
+| Reaktionstest | `docs/spiele/reaktionstest/` | Kurze Spiele |
 | Minigolf | `docs/spiele/minigolf/` | Geschicklichkeit |
-| Kometenrennen | `docs/spiele/rennen/` | Karten & Brett, Zu zweit |
+| Kometenrennen | `docs/spiele/kometenrennen/` | Karten & Brett, Zu zweit |
 | Solitär | `docs/spiele/solitaer/` | Karten & Brett |
-| Schiffe versenken | `docs/spiele/schiffe/` | Strategie |
+| Schiffe versenken | `docs/spiele/schiffe-versenken/` | Strategie |
 | Mühle | `docs/spiele/muehle/` | Karten & Brett, Zu zweit |
-| Sudoku (3 Stufen) | `docs/spiele/sudoku9/` | Logik |
+| Sudoku (3 Stufen) | `docs/spiele/sudoku/` | Logik |
 | Wortjagd | `docs/spiele/wortjagd/` | Denkspiele |
-| Andersfarbig | `docs/spiele/farbton/` | Kurze Spiele |
-| Reichenspiel | `docs/spiele/reich/` | Karten & Brett, Strategie |
-| Steine schmeißen | `docs/spiele/steine/` | Action |
-| Heast chü amoi | `docs/spiele/heast/` | Karten & Brett, Zu zweit |
+| Andersfarbig | `docs/spiele/andersfarbig/` | Kurze Spiele |
+| Reichenspiel | `docs/spiele/reichenspiel/` | Karten & Brett, Strategie |
+| Steine schmeißen | `docs/spiele/steine-schmeissen/` | Action |
+| Heast chü amoi | `docs/spiele/heast-chue-amoi/` | Karten & Brett, Zu zweit |
 | Hüpfer | `docs/spiele/huepfer/` | Action, Kurze Spiele |
 | Krieg der Adligen | extern auf games.webnoah.andrerer.org | Strategie |
 | Sudoku Solver | extern auf games.webnoah.andrerer.org | Logik |
@@ -89,19 +89,20 @@ docs/assets/js/shell.js    Rahmen jeder Spielseite (Punkte, Rekord, Tasten, Best
 docs/profil/               Profilseite
 docs/bestenliste/          Bestenlisten aller Spiele
 docs/admin/                Admin-Portal
-docs/spiele/<id>/          eine Seite pro Spiel: index.html + game.js
+docs/spiele/<name>/        eine Seite pro Spiel: index.html + <name>.js (Vollbild, nur Zurück-Symbol)
+docs/_redirects            leitet alte Spieladressen auf die neuen Namen um (Cloudflare)
 ```
 
 ## Neues Spiel hinzufügen
 
-1. Ordner `docs/spiele/<id>/` anlegen und `index.html` aus einem bestehenden Spiel kopieren. `data-game="<id>"` und den Titel anpassen.
-2. In `docs/spiele/<id>/game.js` eine Funktion `WNG.games.<id> = function (stage, ui) { … }` anlegen. `stage` ist der Spielbereich, `ui` bietet:
+1. Ordner `docs/spiele/<name>/` anlegen (Name wie das Spiel, klein, mit Bindestrichen) und `index.html` aus einem bestehenden Spiel kopieren. `data-game="<id>"`, den Titel und das Skript `<name>.js` anpassen.
+2. In `docs/spiele/<name>/<name>.js` eine Funktion `WNG.games.<id> = function (stage, ui) { … }` anlegen. `stage` ist der Spielbereich, `ui` bietet:
    - `ui.score(wert)` und `ui.status(text, notiz)` für Anzeige und Statuszeile
    - `ui.submit(wert, variante)` speichert einen Rekord und liefert `true`, wenn er neu ist
    - `ui.onKey(fn)`, `ui.onKeyUp(fn)`, `ui.onRestart(fn)` für Tasten und den Neu-starten-Knopf
    - `ui.tools` als Platz für Umschalter über dem Spielfeld
    Die Funktion darf eine Aufräumfunktion zurückgeben.
-3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen (`better: "high"` oder `"low"`). Spiele mit getrennten Bestenlisten pro Stufe bekommen `variants: [["id", "Name"], …]` und `variant` für die Standardstufe. Für die Bestenliste das Spiel auch in `GAMES` in `src/worker.js` eintragen (mit erlaubtem Wertebereich).
+3. Einen Eintrag in `docs/assets/js/catalog.js` ergänzen, mit `id` (interne Kennung für Rekorde, nie ändern) und `slug` (Ordnername) (`better: "high"` oder `"low"`). Spiele mit getrennten Bestenlisten pro Stufe bekommen `variants: [["id", "Name"], …]` und `variant` für die Standardstufe. Für die Bestenliste das Spiel auch in `GAMES` in `src/worker.js` eintragen (mit erlaubtem Wertebereich).
 4. Optional eine Vorschau in `docs/assets/js/previews.js` unter `PREVIEW.<id>` zeichnen.
 
 ## Veröffentlichen

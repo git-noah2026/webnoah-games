@@ -3,8 +3,7 @@
   "use strict";
   const { h, store, bestKey, favs, pal, reduced, root, fmt } = WNG;
 
-  const href = g => g.ext || `${root}spiele/${g.id}/`;
-  WNG.href = href;
+  const href = WNG.href;
 
   /* ---------- Vorschau-Schleife: eine für alle sichtbaren Karten ---------- */
   const thumbs = [];

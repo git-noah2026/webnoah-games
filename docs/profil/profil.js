@@ -49,7 +49,7 @@
           <thead><tr><th>Spiel</th><th>Rekord</th><th>Partien</th><th>Zuletzt</th></tr></thead>
           <tbody>${recRows.map(({ g, r }) => {
             const st = statOf(g.id);
-            return `<tr><td><a href="${root}spiele/${g.id}/">${g.name}</a>${variantName(r.variant, g.id) ? ` <small>${variantName(r.variant, g.id)}</small>` : ""}</td>
+            return `<tr><td><a href="${WNG.href(g)}">${g.name}</a>${variantName(r.variant, g.id) ? ` <small>${variantName(r.variant, g.id)}</small>` : ""}</td>
               <td><mark>${fmt(g, r.value)}</mark></td><td>${st ? st.plays : "–"}</td><td>${date(r.updated)}</td></tr>`;
           }).join("")}</tbody></table></div>`
           : `<p class="lb-empty">${own ? "Noch keine Rekorde. Such dir ein Spiel aus und leg los." : "Noch keine Rekorde."}</p>`}

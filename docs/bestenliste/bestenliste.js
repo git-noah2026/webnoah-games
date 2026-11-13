@@ -36,7 +36,7 @@
       const mine = !auth.user
         ? `<p class="lb-cta"><button class="btn primary" type="button" data-login>Anmelden</button> und mitspielen.</p>`
         : d.mine ? `<p class="lb-cta">Dein Platz: <b>#${d.mine.rank}</b> mit <mark>${fmt(game, d.mine.value)}</mark></p>`
-        : `<p class="lb-cta">Noch kein Eintrag von dir. <a href="${root}spiele/${game.id}/">${esc(game.name)} spielen →</a></p>`;
+        : `<p class="lb-cta">Noch kein Eintrag von dir. <a href="${WNG.href(game)}">${esc(game.name)} spielen →</a></p>`;
       out.innerHTML = `
         <div class="lb-big-head"><h2 class="display">${esc(game.name)}</h2>
           <span class="eyebrow">${game.better === "low" ? "weniger ist besser" : "mehr ist besser"} · Top 10</span></div>

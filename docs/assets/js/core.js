@@ -20,6 +20,8 @@
   };
   const bestKey = (id, v) => "wng:" + id + (v ? ":" + v : "");
   const fmt = (g, v) => g.unit ? `${v} ${g.unit}` : `${v}`;
+  // Adresse eines Spiels: eigener Name (slug) im Pfad, externe Spiele direkt
+  const href = g => g.ext || `${root}spiele/${g.slug || g.id}/`;
   const variantName = (g, v) => ((g && g.variants) || []).reduce((out, [k, l]) => k === v ? l : out, "");
   const favs = {
     all: () => store.get("wng:favs") || [],
@@ -60,7 +62,8 @@
   function makeCanvas(stage, Wd, Ht) {
     const wrap = h("div", "board");
     wrap.style.aspectRatio = `${Wd} / ${Ht}`;
-    wrap.style.width = `min(100%, ${Math.round(Wd * 1.3)}px, max(260px, calc((100dvh - 330px) * ${(Wd / Ht).toFixed(3)})))`;
+    // Auf der Vollbild-Spielseite füllt das Feld die freie Höhe (--gp-chrome = Platz für Leiste, Knöpfe, Status)
+    wrap.style.width = `min(100%, ${Math.round(Wd * 1.8)}px, max(240px, calc((100dvh - var(--gp-chrome, 330px)) * ${(Wd / Ht).toFixed(3)})))`;
     const cv = h("canvas");
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Wd * dpr; cv.height = Ht * dpr;
@@ -153,6 +156,6 @@
     if (t) t.textContent = `${two(now.getHours())}:${two(now.getMinutes())}`;
   }
 
-  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, fmt, variantName, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
+  Object.assign(W, { $, h, rnd, clamp, shuffle, two, reduced, root, store, bestKey, fmt, variantName, href, favs, pal, rr, karo, MONO, BODY, disp, makeCanvas, segmented, SUB, REPO });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", chrome); else chrome();
 })();

@@ -12,46 +12,38 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="../../assets/css/site.css">
 </head>
-<body data-game="schlange">
-<div id="site-header"></div>
-
-<main class="play">
-  <div class="gutter">
-    <a class="back" href="../../#spiele">← Alle Spiele</a>
-    <div class="play-head">
-      <div>
-        <p class="eyebrow" id="p-eyebrow"></p>
-        <h1 class="display" id="p-name">Schlange</h1>
-      </div>
-      <div class="play-side">
-        <div class="stat"><span class="lbl" id="p-lbl">Punkte</span><span class="val" id="p-score">0</span></div>
-        <div class="stat"><span class="lbl" id="p-blbl">Rekord</span><span class="val" id="p-best">–</span></div>
-        <button class="btn fav-btn" id="p-fav" type="button" aria-pressed="false">★<span> Merken</span></button>
-        <button class="btn primary" id="p-restart" type="button">Neu starten</button>
-      </div>
+<body class="game-page" data-game="schlange">
+<main class="gp">
+  <header class="gp-bar">
+    <a class="gp-icon gp-home" href="../../" aria-label="Zurück zum Hauptmenü" title="Zurück zum Hauptmenü"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h4.5V14h4v5.5h4.5V10"/></svg></a>
+    <div class="gp-hud" aria-live="off">
+      <span><small id="p-lbl">Punkte</small><b id="p-score">0</b></span>
+      <span class="best"><small id="p-blbl">Rekord</small><b id="p-best">–</b></span>
     </div>
-    <div class="sheet">
-      <div class="tools" id="p-tools"></div>
-      <div class="stage" id="stage"></div>
-      <p class="status" id="p-status" aria-live="polite"></p>
-    </div>
-    <p class="help" id="p-help"></p>
-
-    <section class="more" aria-label="Weitere Spiele">
-      <h2 class="display">Weitere Spiele</h2>
-      <div class="cards" id="more"></div>
-    </section>
-  </div>
+    <button class="gp-icon" id="p-restart" type="button" aria-label="Neu starten" title="Neu starten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg></button>
+    <button class="gp-icon" id="p-info" type="button" aria-label="Spielregeln und Bestenliste" title="Spielregeln und Bestenliste" aria-expanded="false" aria-controls="p-drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".6" fill="currentColor"/></svg></button>
+  </header>
+  <div class="tools" id="p-tools"></div>
+  <div class="stage" id="stage"></div>
+  <p class="status" id="p-status" aria-live="polite"></p>
 </main>
 
-<div id="site-footer"></div>
+<div class="gp-scrim" id="p-scrim"></div>
+<aside class="gp-drawer" id="p-drawer" hidden aria-hidden="true" aria-label="Spielregeln und Bestenliste">
+  <div class="gp-d-head">
+    <div><p class="gp-d-meta eyebrow"></p><h2 class="display gp-d-name">Schlange</h2></div>
+    <button class="gp-icon gp-d-close" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <section><h3>So geht’s</h3><p class="gp-d-help"></p></section>
+  <button class="btn fav-btn" id="p-fav" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></svg><span>Als Favorit merken</span></button>
+  <section class="lb-panel" id="p-board" hidden></section>
+  <a class="btn gp-d-menu" href="../../">Zurück zum Hauptmenü</a>
+</aside>
 
 <script src="../../assets/js/core.js"></script>
 <script src="../../assets/js/catalog.js"></script>
 <script src="../../assets/js/auth.js"></script>
-<script src="../../assets/js/previews.js"></script>
-<script src="../../assets/js/cards.js"></script>
-<script src="game.js"></script>
+<script src="schlange.js"></script>
 <script src="../../assets/js/shell.js"></script>
 </body>
 </html>

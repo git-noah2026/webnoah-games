@@ -189,6 +189,8 @@
   function banner() {
     const old = document.querySelector(".announce:not(.static)"); if (old) old.remove();
     const a = auth.settings.announcement;
+    // Im Spiel stört die Leiste nur, sie erscheint im Hauptmenü
+    if (document.body.classList.contains("game-page")) return;
     if (!a || !a.text || store.get("wng:ann:" + a.id)) return;
     const el = h("div", `announce lvl-${a.level}`);
     el.setAttribute("role", "status");
